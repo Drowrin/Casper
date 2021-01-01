@@ -1,0 +1,10 @@
+{
+    "extends": "@tsconfig/node14/tsconfig.json",
+
+    "include": ["src/**/*"],
+
+    "compilerOptions": {
+        "outDir": "build",
+        "experimentalDecorators": true,
+    },
+}
