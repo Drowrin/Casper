@@ -108,7 +108,7 @@ export class Property {
         this.categories = categories;
         this.args = args;
         this.description = description;
-        this.display = display;
+        this.display = display || parent.name;
     }
 
     static resolver(parent: Entity, m: { [key: string]: any }) {
