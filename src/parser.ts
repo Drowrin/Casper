@@ -56,19 +56,7 @@ export class Equipment {
 
         this.cost = cost;
         this.weight = weight;
-        this.categories = categories.map(function (s: string) {
-            const ref = `category$${s}`;
-            const entity = m[ref];
-
-            if (entity === undefined)
-                throw `${parent.id} contains an undefined reference: "${ref}"!`
-            
-            return {
-                name: entity.name,
-                id: entity.id,
-                description: entity.description,
-            };
-        });
+        this.categories = categories.map(Category.resolver(parent, m));
     }
 }
 
@@ -175,6 +163,22 @@ export class Category {
                 this.entities.push(k);
             }
         }
+    }
+
+    static resolver(parent: Entity, m: { [key: string]: any }) {
+        return function (ref: string) {
+            const fullRef = `category$${ref}`;
+            const entity = m[fullRef];
+
+            if (entity === undefined)
+                throw `${parent.id} contains an undefined reference: "${fullRef}"!`
+            
+            return {
+                name: entity.name,
+                id: entity.id,
+                description: entity.description,
+            };
+        };
     }
 }
 
