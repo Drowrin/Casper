@@ -66,7 +66,7 @@ export class Equipment {
             return {
                 name: entity.name,
                 id: entity.id,
-                description: entity.category.description,
+                description: entity.description,
             };
         });
     }
@@ -155,14 +155,16 @@ export class Property {
 
 @component
 export class Category {
-    description: string;
+    entities: string[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
-        validate('category', data, ['description']);
-
-        const { description } = data;
-
-        this.description = description;
+        const name = parent.id.split('$')[1];
+        this.entities = [];
+        for (const k in m) {
+            if (m[k].equipment && m[k].equipment.categories.includes(name)){
+                this.entities.push(k);
+            }
+        }
     }
 }
 
