@@ -99,6 +99,7 @@ export class Property {
     args: string[];
     description: string;
     display: string;
+    entities: string[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any) {
         validate('property', data, ['categories', 'args', 'description', 'display']);
@@ -109,6 +110,15 @@ export class Property {
         this.args = args;
         this.description = description;
         this.display = display || parent.name;
+
+        const name = parent.id.split('$')[1];
+        this.entities = [];
+        for (const k in m) {
+            const e = m[k].armor || m[k].weapon;
+            if (e && e.properties.some((prop: any) => prop.ref === name)){
+                this.entities.push(k);
+            }
+        }
     }
 
     static resolver(parent: Entity, m: { [key: string]: any }) {
