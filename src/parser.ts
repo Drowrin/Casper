@@ -97,7 +97,7 @@ export class Property {
         this.categories = categories;
         this.args = args;
         this.description = description;
-        this.display = display || parent.name;
+        this.display = display;
 
         const name = parent.id.split('$')[1];
         this.entities = [];
