@@ -116,15 +116,11 @@ export class Casper {
                     weight: 0.2
                 },
                 {
-                    name: 'components.equipment.categories.name',
+                    name: 'components.categories.name',
                     weight: 1
                 },
                 {
-                    name: 'components.armor.properties.name',
-                    weight: 1
-                },
-                {
-                    name: 'components.weapon.properties.name',
+                    name: 'components.equipment.properties.name',
                     weight: 1
                 },
             ],
