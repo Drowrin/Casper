@@ -3,7 +3,7 @@ import cors = require('cors');
 import hash = require('object-hash');
 import { Casper } from "./casper";
 
-const casper = new Casper();
+const casper = new Casper('./data');
 
 console.log(`Loaded ${casper.length} entities!`);
 

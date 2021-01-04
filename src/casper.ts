@@ -67,7 +67,7 @@ export class Casper {
     entities: EntityMap;
     length: number;
 
-    constructor(dataDir = './data') {
+    constructor(dataDir: string) {
         var ent = loadFiles(dataDir);
 
         this.length = ent.length;
