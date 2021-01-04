@@ -11,7 +11,7 @@ const index = JSON.stringify(casper.index().toJSON());
 
 console.log(`Index generated! Size: ${Buffer.byteLength(index, 'utf-8')} bytes`);
 
-const casperHash = hash(casper + index);
+const casperHash = hash(casper) + hash(index);
 
 console.log(`Casper version hash: ${casperHash}`);
 
