@@ -1,6 +1,7 @@
 import yaml = require('js-yaml');
 import fs = require('fs');
 import path = require('path');
+import Fuse from 'fuse.js';
 import { Entity } from "./parser";
 
 type EntityMap = { [key: string]: Entity };
@@ -92,6 +93,14 @@ export class Casper {
 
     get(id: string): Entity | undefined {
         return this.entities[id];
+    }
+
+    index() {
+        return Fuse.createIndex(
+            [ 'name', 'id', 'description',
+            ],
+            Object.values(this.entities),
+        );
     }
 }
 

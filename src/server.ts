@@ -7,7 +7,11 @@ const casper = new Casper();
 
 console.log(`Loaded ${casper.length} entities!`);
 
-const casperHash = hash(casper);
+const index = JSON.stringify(casper.index().toJSON());
+
+console.log(`Index generated! Size: ${Buffer.byteLength(index, 'utf-8')} bytes`);
+
+const casperHash = hash(casper + index);
 
 console.log(`Casper version hash: ${casperHash}`);
 
@@ -24,6 +28,10 @@ app.get('/entity/:id', (req, res) => {
 
 app.get('/hash', (req, res) => {
     res.send(casperHash);
+});
+
+app.get('/index', (req, res) => {
+    res.send(index);
 });
 
 app.listen(3001);
