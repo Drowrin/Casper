@@ -1,6 +1,7 @@
 export class Entity {
     name: string;
     id: string;
+    categories: object[];
 
     description?: string;
 
@@ -17,6 +18,8 @@ export class Entity {
         this.name = data.name;
         this.id = data.id;
 
+        this.categories = data.categories.map(Category.resolver(this, m));
+
         this.description = data.description;
 
         if (data.equipment) this.equipment = new Equipment(this, m, data.equipment);
@@ -30,7 +33,6 @@ export class Entity {
 }
 
 export class Equipment {
-    categories: object[];
     properties: object[];
     cost: string;
     weight: string;
@@ -40,7 +42,6 @@ export class Equipment {
 
         this.cost = cost;
         this.weight = weight;
-        this.categories = categories.map(Category.resolver(parent, m));
         this.properties = properties.map(Property.resolver(parent, m));
     }
 }
@@ -89,11 +90,6 @@ export class Property {
 
     static resolver(parent: Entity, m: { [key: string]: any }) {
         return function (prop: any) {
-            const equipment = m[parent.id].equipment;
-
-            if (equipment === undefined)
-                throw `${parent.id} cannot be a weapon without also being equipment!`
-
             const ref = `property$${prop.ref}`;
             const entity = m[ref];
 
@@ -101,9 +97,9 @@ export class Property {
                 throw `${parent.id} contains an undefined reference: "${ref}"!`
             
             const property = entity.property;
-
-            if (property.categories.length > 0 && !property.categories.some((c: any) => equipment.categories.includes(c)))
-                throw `${parent.id} [${equipment.categories}] does not match any possible categories for ${ref} [${property.categories}]!`
+            
+            if (property.categories.length > 0 && !property.categories.some((c: any) => m[parent.id].categories.includes(c)))
+                throw `${parent.id} [${m[parent.id].categories}] does not match any possible categories for ${ref} [${property.categories}]!`
             
             var description = property.description;
             var display = property.display || entity.name;
@@ -136,7 +132,7 @@ export class Category {
         const name = parent.id.split('$')[1];
         this.entities = [];
         for (const k in m) {
-            if (m[k].equipment && m[k].equipment.categories.includes(name)){
+            if (m[k].categories.includes(name)){
                 this.entities.push(k);
             }
         }

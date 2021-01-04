@@ -1,6 +1,7 @@
 export const schema = [{
     name: "string",
     id: "string",
+    categories: ["string"],
 
     "description?": "string",
 
@@ -14,7 +15,6 @@ export const schema = [{
     },
 
     "equipment?": {
-        categories: ["string"],
         cost: "string",
         weight: "string",
         properties: [{
