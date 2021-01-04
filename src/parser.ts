@@ -8,42 +8,38 @@ function validate(name: string, data: any, required: string[]) {
     }
 }
 
-var component_data: Map<string, any> = new Map();
-function component(c: any) {
-    component_data.set(c.name.toLowerCase(), c);
-    return c;
-}
-
 export class Entity {
     name: string;
     id: string;
-    components: { [key: string]: any };
+
     description?: string;
+
+    equipment?:Equipment;
+    tool?:Tool;
+    property?:Property;
+    category?:Category;
+    armor?:Armor;
+    weapon?:Weapon;
+    vehicle?:Vehicle;
 
     constructor(m: { [key: string]: any }, data: any) {
         validate('root', data, ['id', 'name']);
 
-        var { name, id, description, ...components} = data;
+        this.name = data.name;
+        this.id = data.id;
 
-        this.name = name;
-        this.id = id;
+        this.description = data.description;
 
-        if (description !== undefined)
-            this.description = description;
-
-        this.components = {};
-
-        for (var key in components) {
-            if (component_data.get(key) === undefined)
-                throw `${this.id} contains unknown component: "${key}"!`
-            
-            var f = component_data.get(key);
-            this.components[key] = new f(this, m, components[key]);
-        }
+        if (data.equipment) this.equipment = new Equipment(this, m, data.equipment);
+        if (data.tool) this.tool = new Tool(this, m, data.tool);
+        if (data.property) this.property = new Property(this, m, data.property);
+        if (data.category) this.category = new Category(this, m, data.category);
+        if (data.armor) this.armor = new Armor(this, m, data.armor);
+        if (data.weapon) this.weapon = new Weapon(this, m, data.weapon);
+        if (data.vehicle) this.vehicle = new Vehicle(this, m, data.vehicle);
     }
 }
 
-@component
 export class Equipment {
     categories: object[];
     cost: string;
@@ -60,7 +56,6 @@ export class Equipment {
     }
 }
 
-@component
 export class Tool {
     proficiency: string;
     skills: object[];
@@ -81,7 +76,6 @@ export class Tool {
     }
 }
 
-@component
 export class Property {
     categories: string[];
     args: string[];
@@ -151,7 +145,6 @@ export class Property {
     }
 }
 
-@component
 export class Category {
     entities: string[];
 
@@ -182,7 +175,6 @@ export class Category {
     }
 }
 
-@component
 export class Armor {
     ac: string;
     properties: object[];
@@ -190,7 +182,7 @@ export class Armor {
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
         validate('armor', data, ['ac', 'properties']);
 
-        const equipment = parent.components.equipment;
+        const equipment = parent.equipment;
 
         if (equipment === undefined)
             throw `${parent.id} cannot be armor without also being equipment!`
@@ -202,7 +194,6 @@ export class Armor {
     }
 }
 
-@component
 export class Weapon {
     damage: string;
     type: string;
@@ -219,7 +210,6 @@ export class Weapon {
     }
 }
 
-@component
 export class Vehicle {
     speed: string;
     capacity: string;

@@ -63,22 +63,8 @@ function resolveEntities(ent: any[]): { [key: string]: Entity } {
     return out;
 }
 
-/**
- * Returns all valid components that appear in at least one entity
- */
-function collectComponents(entities: EntityMap): string [] {
-    var components: Set<string> = new Set();
-
-    for (const entity of Object.values(entities))
-        for (const component in entity.components)
-            components.add(component);
-
-    return Array.from(components);
-}
-
 export class Casper {
     entities: EntityMap;
-    components: string [];
     length: number;
 
     constructor(dataDir = './data') {
@@ -87,8 +73,6 @@ export class Casper {
         this.length = ent.length;
 
         this.entities = resolveEntities(ent);
-
-        this.components = collectComponents(this.entities);
     }
 
     get(id: string): Entity | undefined {
@@ -97,8 +81,31 @@ export class Casper {
 
     index() {
         return Fuse.createIndex(
-            [ 'name', 'id', 'description', 'components.equipment.categories.name', 'components.armor.properties.name',
-            'components.weapon.properties.name'
+            [
+                {
+                    name: 'name',
+                    weight: 2,
+                },
+                { 
+                    name: 'id',
+                    weight: 1.5
+                },
+                {
+                    name: 'description',
+                    weight: 0.2
+                },
+                {
+                    name: 'components.equipment.categories.name',
+                    weight: 1
+                },
+                {
+                    name: 'components.armor.properties.name',
+                    weight: 1
+                },
+                {
+                    name: 'components.weapon.properties.name',
+                    weight: 1
+                },
             ],
             Object.values(this.entities),
         );
