@@ -97,7 +97,8 @@ export class Casper {
 
     index() {
         return Fuse.createIndex(
-            [ 'name', 'id', 'description',
+            [ 'name', 'id', 'description', 'components.equipment.categories.name', 'components.armor.properties.name',
+            'components.weapon.properties.name'
             ],
             Object.values(this.entities),
         );
