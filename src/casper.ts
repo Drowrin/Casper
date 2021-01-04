@@ -2,7 +2,10 @@ import yaml = require('js-yaml');
 import fs = require('fs');
 import path = require('path');
 import Fuse from 'fuse.js';
+import YamlValidator = require('yaml-validator');
+import { schema } from "./schema";
 import { Entity } from "./parser";
+import { exit } from 'process';
 
 type EntityMap = { [key: string]: Entity };
 
@@ -11,25 +14,20 @@ type EntityMap = { [key: string]: Entity };
  * Each file is validated and references are replaced.
  * Returns a map of ids to entities
  */
-function loadFiles(mainDataDir: string): any[] {
+function loadFiles(mainDataDir: string, validator: YamlValidator): any[] {
     
     /**
-     * Recurse through directories and gather all YAML data.
-     * Returns an array of all entities.
+     * Recurse through directories and gather paths to all yaml files.
      */
-    function loadFilesInner(dataDir: string): any[] {
-        var out: any[] = [];
+    function loadFilesInner(dataDir: string): string[] {
+        var out: string[] = [];
     
         for (const file of fs.readdirSync(dataDir)) {
             var pathString = path.join(dataDir, file);
             var stats = fs.lstatSync(pathString);
     
             if (stats.isFile() && file.endsWith('.yml')) {
-                out = out.concat(
-                    yaml.safeLoad(
-                        <string><any> fs.readFileSync(pathString)
-                    )
-                );
+                out.push(pathString);
             } else if (stats.isDirectory()) {
                 out = out.concat(loadFilesInner(dataDir));
             }
@@ -38,7 +36,25 @@ function loadFiles(mainDataDir: string): any[] {
         return out;
     }
 
-    return loadFilesInner(mainDataDir);
+    const allFiles = loadFilesInner(mainDataDir);
+
+    validator.validate(allFiles);
+    const errors = validator.report();
+    if (errors > 0) {
+        console.error(`Invalid files: ${errors}\nCheck parselog for details`);
+        exit();
+    }
+
+    var out: any[] = [];
+    for (const file of allFiles) {
+        out = out.concat(
+            (<any> yaml.safeLoad(
+                <string><any> fs.readFileSync(file)
+            ))
+        );
+    }
+
+    return out;
 }
 
 /**
@@ -68,7 +84,12 @@ export class Casper {
     length: number;
 
     constructor(dataDir: string) {
-        var ent = loadFiles(dataDir);
+        const validator = new YamlValidator({
+            structure: schema,
+            log: "parselog",
+        });
+
+        var ent = loadFiles(dataDir, validator);
 
         this.length = ent.length;
 
@@ -115,7 +136,7 @@ export class Casper {
 if (require.main === module) {
     var arg = process.argv.slice(2).join('$');
 
-    var casper = new Casper();
+    var casper = new Casper('./data');
 
     console.log(casper.get(arg));
 }

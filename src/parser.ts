@@ -1,13 +1,3 @@
-function validate(name: string, data: any, required: string[]) {
-    if (data === undefined)
-        throw `${name} must be non-empty!`
-    
-    for (var r of required) {
-        if (data[r] === undefined)
-            throw `${name} is missing "${r}"!`
-    }
-}
-
 export class Entity {
     name: string;
     id: string;
@@ -23,7 +13,6 @@ export class Entity {
     vehicle?:Vehicle;
 
     constructor(m: { [key: string]: any }, data: any) {
-        validate('root', data, ['id', 'name']);
 
         this.name = data.name;
         this.id = data.id;
@@ -46,8 +35,6 @@ export class Equipment {
     weight: string;
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any) {
-        validate('equipment', data, ['categories', 'cost', 'weight']);
-
         const { categories, cost, weight } = data;
 
         this.cost = cost;
@@ -64,8 +51,6 @@ export class Tool {
     activities: object[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any) {
-        validate('tool', data, ['proficiency', 'skills', 'supplies', 'uses', 'activities']);
-
         const { proficiency, skills, supplies, uses, activities } = data;
 
         this.proficiency = proficiency;
@@ -84,8 +69,6 @@ export class Property {
     entities: string[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any) {
-        validate('property', data, ['categories', 'args', 'description', 'display']);
-
         const { categories, args, description, display } = data;
 
         this.categories = categories;
@@ -180,8 +163,6 @@ export class Armor {
     properties: object[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
-        validate('armor', data, ['ac', 'properties']);
-
         const equipment = parent.equipment;
 
         if (equipment === undefined)
@@ -200,8 +181,6 @@ export class Weapon {
     properties: object[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
-        validate('weapon', data, ['damage', 'type', 'properties']);
-        
         const { damage, type, properties } = data;
 
         this.damage = damage;
@@ -216,8 +195,6 @@ export class Vehicle {
     workers: string;
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
-        validate('vehicle', data, ['speed', 'capacity', 'workers']);
-
         const { speed, capacity, workers } = data;
 
         this.speed = speed;

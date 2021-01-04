@@ -6,6 +6,7 @@ import { Casper } from "./casper";
 const casper = new Casper('./data');
 
 console.log(`Loaded ${casper.length} entities!`);
+console.log(`Manifest Size: ${Buffer.byteLength(JSON.stringify(casper), 'utf-8')} bytes`);
 
 const index = JSON.stringify(casper.index().toJSON());
 
