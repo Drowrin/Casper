@@ -17,21 +17,18 @@ export const schema = [{
         categories: ["string"],
         cost: "string",
         weight: "string",
+        properties: [{
+            ref: "string",
+        }],
     },
 
     "armor?": {
         ac: "string",
-        properties: [{
-            ref: "string",
-        }],
     },
 
     "weapon?": {
         damage: "string",
         type: "string",
-        properties: [{
-            ref: "string",
-        }],
     },
 
     "vehicle?": {

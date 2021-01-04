@@ -31,15 +31,17 @@ export class Entity {
 
 export class Equipment {
     categories: object[];
+    properties: object[];
     cost: string;
     weight: string;
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any) {
-        const { categories, cost, weight } = data;
+        const { categories, cost, weight, properties } = data;
 
         this.cost = cost;
         this.weight = weight;
         this.categories = categories.map(Category.resolver(parent, m));
+        this.properties = properties.map(Property.resolver(parent, m));
     }
 }
 
@@ -79,8 +81,7 @@ export class Property {
         const name = parent.id.split('$')[1];
         this.entities = [];
         for (const k in m) {
-            const e = m[k].armor || m[k].weapon;
-            if (e && e.properties.some((prop: any) => prop.ref === name)){
+            if (m[k].equipment && m[k].equipment.properties.some((prop: any) => prop.ref === name)){
                 this.entities.push(k);
             }
         }
@@ -160,7 +161,6 @@ export class Category {
 
 export class Armor {
     ac: string;
-    properties: object[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
         const equipment = parent.equipment;
@@ -171,21 +171,18 @@ export class Armor {
         const { ac, properties } = data;
 
         this.ac = ac;
-        this.properties = properties.map(Property.resolver(parent, m));
     }
 }
 
 export class Weapon {
     damage: string;
     type: string;
-    properties: object[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
         const { damage, type, properties } = data;
 
         this.damage = damage;
         this.type = type;
-        this.properties = properties.map(Property.resolver(parent, m));
     }
 }
 
