@@ -56,10 +56,23 @@ export default [{
         "display?": "string",
     },
 
+    // This component is a list of objects that include `ref`, which refers to a property by id.
+    //     Like categories, "property$" is added automatically.
+    //     If the property requires args, they should be included as properties of the object.
+    //
+    // With Range and Heavy for example:
+    //     properties:
+    //       - ref: range
+    //         normal: 30
+    //         max: 60
+    //       - ref: heavy
+    "properties?": [{
+        ref: "string",
+    }],
+
     // Any entity that is a physical item with at least cost and weight should have this component.
     // TODO: handle "materials" like paper and ink, planks, ingots? Optional "bundle" and "unit" fields?
     // TODO: rename to "item" or something to be more general?
-    // TODO: move properties to root component?
     //
     // `cost` is a string including coinage. For example "10 gp".
     //     May be null. Useful for items that do not have a market value.
@@ -67,21 +80,9 @@ export default [{
     // `weight` is a string including unit. For example "5 lb".
     //     May be null. Useful for items with negligible weight.
     //
-    // `properties` is a list of objects that include `ref`, which refers to a property by id.
-    //     Like categories, "property$" is added automatically.
-    //     If the property requires args, they should be included as properties of the object.
-    //     With Range and Heavy for example:
-    //     properties:
-    //       - ref: range
-    //         normal: 30
-    //         max: 60
-    //       - ref: heavy
     "equipment?": {
         cost: "string",
         weight: "string",
-        properties: [{
-            ref: "string",
-        }],
     },
 
     // If an entity is armor, it should include this component.

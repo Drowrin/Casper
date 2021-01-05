@@ -15,6 +15,7 @@ export class Entity {
     // optional components
     // if the raw data contains a matching field, it is resolved into a component
     equipment?:Equipment;
+    properties?:ResolvedProperty[];
     tool?:Tool;
     property?:Property;
     category?:Category;
@@ -31,6 +32,7 @@ export class Entity {
         this.description = data.description;
 
         if (data.equipment) this.equipment = new Equipment(this, m, data.equipment);
+        if (data.properties) this.properties = data.properties.map(Property.resolver(this, m));
         if (data.tool) this.tool = new Tool(this, m, data.tool);
         if (data.property) this.property = new Property(this, m, data.property);
         if (data.category) this.category = new Category(this, m, data.category);
@@ -41,14 +43,12 @@ export class Entity {
 }
 
 export class Equipment {
-    properties: ResolvedProperty[];
     cost: string;
     weight: string;
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any) {
         this.cost = data.cost;
         this.weight = data.weight;
-        this.properties = data.properties.map(Property.resolver(parent, m));
     }
 }
 
@@ -70,11 +70,11 @@ export class Tool {
 
 class ResolvedProperty {
     constructor(
-        name: string,
-        id: string,
-        description: string,
-        display: string,
-        args: { [key: string]: {ref: string, [key: string]: any} },
+        public name: string,
+        public id: string,
+        public description: string,
+        public display: string,
+        public args: { [key: string]: {ref: string, [key: string]: any} },
     ) {}
 }
 
@@ -96,7 +96,7 @@ export class Property {
         const name = parent.id.split('$')[1];
         this.entities = [];
         for (const k in m) {
-            if (m[k].equipment && m[k].equipment.properties.some((prop: any) => prop.ref === name)){
+            if (m[k].properties && m[k].properties.some((prop: any) => prop.ref === name)){
                 this.entities.push(k);
             }
         }
@@ -106,11 +106,11 @@ export class Property {
      * Generates a resolver function that has access to the manifest and parent Entity.
      * Convenient for mapping arrays of references, but can simply be called with Property.resolver(parent,m)(data).
      */
-    static resolver(parent: Entity, m: { [key: string]: any }): ResolvedProperty {
+    static resolver(parent: Entity, m: { [key: string]: any }) {
         /**
          * Resolves a Property reference into a ResolvedProperty.
          */
-        return function (prop: {ref: string, [key:string]: any}) {
+        return function (prop: {ref: string, [key:string]: any}): ResolvedProperty {
             // expand ref into full id and get the property entity.
             const ref = `property$${prop.ref}`;
             const entity = m[ref];
@@ -146,9 +146,9 @@ export class Property {
 
 class ResolvedCategory {
     constructor(
-        name: string,
-        id: string,
-        description: string,
+        public name: string,
+        public id: string,
+        public description: string,
     ) {}
 }
 
@@ -170,11 +170,11 @@ export class Category {
      * Generates a resolver function that has access to the manifest and parent Entity.
      * Convenient for mapping arrays of references, but can simply be called with Category.resolver(parent,m)(data).
      */
-    static resolver(parent: Entity, m: { [key: string]: any }): ResolvedCategory {
+    static resolver(parent: Entity, m: { [key: string]: any }) {
         /**
          * Resolves a Property reference into a ResolvedCategory.
          */
-        return function (ref: string) {
+        return function (ref: string): ResolvedCategory {
             const fullRef = `category$${ref}`;
             const entity = m[fullRef];
 

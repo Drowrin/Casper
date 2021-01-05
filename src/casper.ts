@@ -163,5 +163,5 @@ if (require.main === module) {
 
     var casper = new Casper('./data');
 
-    console.log(casper.get(arg));
+    console.log(JSON.stringify(casper.get(arg), null, 2));
 }
