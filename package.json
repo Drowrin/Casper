@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node ./build/server.js"
   },
   "author": "Jordan Bates <drowrin@gmail.com>",
   "license": "MIT",
