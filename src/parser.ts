@@ -76,14 +76,12 @@ type Ref = {
     [key: string]: any
 }
 
-class ResolvedProperty {
-    constructor(
-        public name: string,
-        public id: string,
-        public description: string,
-        public display: string,
-        public args: SMap<any>,
-    ) {}
+interface ResolvedProperty {
+    name: string,
+    id: string,
+    description: string,
+    display: string,
+    args: SMap<any>,
 }
 
 
@@ -147,17 +145,21 @@ export class Property {
                 argmap[arg] = val;
             }
             
-            return new ResolvedProperty(entity.name, entity.id, description, display, argmap);
+            return {
+                name: entity.name,
+                id: entity.id, 
+                description,
+                display,
+                args: argmap
+            };
         }
     }
 }
 
-class ResolvedCategory {
-    constructor(
-        public name: string,
-        public id: string,
-        public description: string,
-    ) {}
+interface ResolvedCategory {
+    name: string,
+    id: string,
+    description: string,
 }
 
 export class Category {
@@ -189,7 +191,11 @@ export class Category {
             if (entity === undefined)
                 throw `${parent.id} contains an undefined reference: "${fullRef}"!`
             
-            return new ResolvedCategory (entity.name, entity.id, entity.description);
+            return {
+                name: entity.name,
+                id: entity.id,
+                description: entity.description
+            };
         };
     }
 }
