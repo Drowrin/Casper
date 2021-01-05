@@ -28,7 +28,7 @@ function loadFiles(mainDataDir: string, validator: YamlValidator): any[] {
     
             if (stats.isFile() && file.endsWith('.yml')) {
                 out.push(pathString);
-            } else if (stats.isDirectory()) {
+            } else if (stats.isDirectory() && !file.startsWith('.')) {
                 out = out.concat(loadFilesInner(dataDir));
             }
         }
