@@ -1,10 +1,19 @@
+/**
+ * The core of all casper data. Everything is an entity.
+ * All entities have a name, id, and at least one category.
+ * All the other fields are optional components.
+ */
 export class Entity {
+    // required fields
     name: string;
     id: string;
-    categories: object[];
+    categories: ResolvedCategory[];
 
+    // optional. brief description of this entity.
     description?: string;
 
+    // optional components
+    // if the raw data contains a matching field, it is resolved into a component
     equipment?:Equipment;
     tool?:Tool;
     property?:Property;
@@ -14,7 +23,6 @@ export class Entity {
     vehicle?:Vehicle;
 
     constructor(m: { [key: string]: any }, data: any) {
-
         this.name = data.name;
         this.id = data.id;
 
@@ -33,36 +41,43 @@ export class Entity {
 }
 
 export class Equipment {
-    properties: object[];
+    properties: ResolvedProperty[];
     cost: string;
     weight: string;
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any) {
-        const { categories, cost, weight, properties } = data;
-
-        this.cost = cost;
-        this.weight = weight;
-        this.properties = properties.map(Property.resolver(parent, m));
+        this.cost = data.cost;
+        this.weight = data.weight;
+        this.properties = data.properties.map(Property.resolver(parent, m));
     }
 }
 
 export class Tool {
     proficiency: string;
-    skills: object[];
-    supplies: object[];
-    uses: object[];
-    activities: object[];
+    skills: {name: string, description: string}[];
+    supplies: {name: string, cost: string, weight: string, description: string}[];
+    activities: {description: string, dc: string}[];
+    uses: {name: string, description: string}[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any) {
-        const { proficiency, skills, supplies, uses, activities } = data;
-
-        this.proficiency = proficiency;
-        this.skills = skills;
-        this.supplies = supplies;
-        this.uses = uses;
-        this.activities = activities;
+        this.proficiency = data.proficiency;
+        this.skills = data.skills;
+        this.supplies = data.supplies;
+        this.uses = data.uses;
+        this.activities = data.activities;
     }
 }
+
+class ResolvedProperty {
+    constructor(
+        name: string,
+        id: string,
+        description: string,
+        display: string,
+        args: { [key: string]: {ref: string, [key: string]: any} },
+    ) {}
+}
+
 
 export class Property {
     categories: string[];
@@ -72,13 +87,12 @@ export class Property {
     entities: string[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any) {
-        const { categories, args, description, display } = data;
+        this.categories = data.categories;
+        this.args = data.args;
+        this.description = data.description;
+        this.display = data.display;
 
-        this.categories = categories;
-        this.args = args;
-        this.description = description;
-        this.display = display;
-
+        // collect a list of ids of all entities that contain this property
         const name = parent.id.split('$')[1];
         this.entities = [];
         for (const k in m) {
@@ -88,8 +102,16 @@ export class Property {
         }
     }
 
-    static resolver(parent: Entity, m: { [key: string]: any }) {
-        return function (prop: any) {
+    /**
+     * Generates a resolver function that has access to the manifest and parent Entity.
+     * Convenient for mapping arrays of references, but can simply be called with Property.resolver(parent,m)(data).
+     */
+    static resolver(parent: Entity, m: { [key: string]: any }): ResolvedProperty {
+        /**
+         * Resolves a Property reference into a ResolvedProperty.
+         */
+        return function (prop: {ref: string, [key:string]: any}) {
+            // expand ref into full id and get the property entity.
             const ref = `property$${prop.ref}`;
             const entity = m[ref];
 
@@ -97,14 +119,17 @@ export class Property {
                 throw `${parent.id} contains an undefined reference: "${ref}"!`
             
             const property = entity.property;
-            
+
+            // check that the parent entity belongs to at least one of the categories this property requires.
             if (property.categories.length > 0 && !property.categories.some((c: any) => m[parent.id].categories.includes(c)))
                 throw `${parent.id} [${m[parent.id].categories}] does not match any possible categories for ${ref} [${property.categories}]!`
             
+            // process display and description with arg values. replace <argname> with the arg values.
             var description = property.description;
             var display = property.display || entity.name;
             var argmap: { [key: string]: any } = {};
             for (const arg of property.args) {
+                // get arg value if it exists. throw error if it doesn't exist
                 var val = prop[arg];
                 if (val === undefined)
                     throw `property ${entity.name} of ${parent.id} is missing arg "${arg}"!`
@@ -114,21 +139,24 @@ export class Property {
                 argmap[arg] = val;
             }
             
-            return {
-                name: entity.name,
-                id: entity.id,
-                description: description,
-                display: display,
-                ...argmap
-            }
+            return new ResolvedProperty(entity.name, entity.id, description, display, argmap);
         }
     }
+}
+
+class ResolvedCategory {
+    constructor(
+        name: string,
+        id: string,
+        description: string,
+    ) {}
 }
 
 export class Category {
     entities: string[];
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
+        // collect a list of ids of all entities that are in this category
         const name = parent.id.split('$')[1];
         this.entities = [];
         for (const k in m) {
@@ -138,7 +166,14 @@ export class Category {
         }
     }
 
-    static resolver(parent: Entity, m: { [key: string]: any }) {
+    /**
+     * Generates a resolver function that has access to the manifest and parent Entity.
+     * Convenient for mapping arrays of references, but can simply be called with Category.resolver(parent,m)(data).
+     */
+    static resolver(parent: Entity, m: { [key: string]: any }): ResolvedCategory {
+        /**
+         * Resolves a Property reference into a ResolvedCategory.
+         */
         return function (ref: string) {
             const fullRef = `category$${ref}`;
             const entity = m[fullRef];
@@ -146,11 +181,7 @@ export class Category {
             if (entity === undefined)
                 throw `${parent.id} contains an undefined reference: "${fullRef}"!`
             
-            return {
-                name: entity.name,
-                id: entity.id,
-                description: entity.description,
-            };
+            return new ResolvedCategory (entity.name, entity.id, entity.description);
         };
     }
 }
@@ -159,14 +190,7 @@ export class Armor {
     ac: string;
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
-        const equipment = parent.equipment;
-
-        if (equipment === undefined)
-            throw `${parent.id} cannot be armor without also being equipment!`
-
-        const { ac, properties } = data;
-
-        this.ac = ac;
+        this.ac = data.ac;
     }
 }
 
@@ -175,10 +199,8 @@ export class Weapon {
     type: string;
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
-        const { damage, type, properties } = data;
-
-        this.damage = damage;
-        this.type = type;
+        this.damage = data.damage;
+        this.type = data.type;
     }
 }
 
@@ -188,10 +210,8 @@ export class Vehicle {
     workers: string;
 
     constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
-        const { speed, capacity, workers } = data;
-
-        this.speed = speed;
-        this.capacity = capacity;
-        this.workers = workers;
+        this.speed = data.speed;
+        this.capacity = data.capacity;
+        this.workers = data.workers;
     }
 }
