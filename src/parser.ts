@@ -1,3 +1,6 @@
+type SMap<t> = { [key:string]: t }
+type Manifest = SMap<any>
+
 /**
  * The core of all casper data. Everything is an entity.
  * All entities have a name, id, and at least one category.
@@ -23,7 +26,7 @@ export class Entity {
     weapon?:Weapon;
     vehicle?:Vehicle;
 
-    constructor(m: { [key: string]: any }, data: any) {
+    constructor(m: Manifest, data: any) {
         this.name = data.name;
         this.id = data.id;
 
@@ -46,7 +49,7 @@ export class Equipment {
     cost: string;
     weight: string;
 
-    constructor(parent: Entity, m: { [key: string]: any }, data: any) {
+    constructor(parent: Entity, m: Manifest, data: any) {
         this.cost = data.cost;
         this.weight = data.weight;
     }
@@ -59,7 +62,7 @@ export class Tool {
     activities: {description: string, dc: string}[];
     uses: {name: string, description: string}[];
 
-    constructor(parent: Entity, m: { [key: string]: any }, data: any) {
+    constructor(parent: Entity, m: Manifest, data: any) {
         this.proficiency = data.proficiency;
         this.skills = data.skills;
         this.supplies = data.supplies;
@@ -68,13 +71,18 @@ export class Tool {
     }
 }
 
+type Ref = {
+    ref: string,
+    [key: string]: any
+}
+
 class ResolvedProperty {
     constructor(
         public name: string,
         public id: string,
         public description: string,
         public display: string,
-        public args: { [key: string]: {ref: string, [key: string]: any} },
+        public args: SMap<any>,
     ) {}
 }
 
@@ -86,7 +94,7 @@ export class Property {
     display: string;
     entities: string[];
 
-    constructor(parent: Entity, m: { [key: string]: any }, data: any) {
+    constructor(parent: Entity, m: Manifest, data: any) {
         this.categories = data.categories;
         this.args = data.args;
         this.description = data.description;
@@ -106,11 +114,11 @@ export class Property {
      * Generates a resolver function that has access to the manifest and parent Entity.
      * Convenient for mapping arrays of references, but can simply be called with Property.resolver(parent,m)(data).
      */
-    static resolver(parent: Entity, m: { [key: string]: any }) {
+    static resolver(parent: Entity, m: Manifest) {
         /**
          * Resolves a Property reference into a ResolvedProperty.
          */
-        return function (prop: {ref: string, [key:string]: any}): ResolvedProperty {
+        return function (prop: Ref): ResolvedProperty {
             // expand ref into full id and get the property entity.
             const ref = `property$${prop.ref}`;
             const entity = m[ref];
@@ -127,7 +135,7 @@ export class Property {
             // process display and description with arg values. replace <argname> with the arg values.
             var description = property.description;
             var display = property.display || entity.name;
-            var argmap: { [key: string]: any } = {};
+            var argmap: SMap<any> = {};
             for (const arg of property.args) {
                 // get arg value if it exists. throw error if it doesn't exist
                 var val = prop[arg];
@@ -155,7 +163,7 @@ class ResolvedCategory {
 export class Category {
     entities: string[];
 
-    constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
+    constructor(parent: Entity, m: Manifest, data: any ) {
         // collect a list of ids of all entities that are in this category
         const name = parent.id.split('$')[1];
         this.entities = [];
@@ -170,7 +178,7 @@ export class Category {
      * Generates a resolver function that has access to the manifest and parent Entity.
      * Convenient for mapping arrays of references, but can simply be called with Category.resolver(parent,m)(data).
      */
-    static resolver(parent: Entity, m: { [key: string]: any }) {
+    static resolver(parent: Entity, m: Manifest) {
         /**
          * Resolves a Property reference into a ResolvedCategory.
          */
@@ -189,7 +197,7 @@ export class Category {
 export class Armor {
     ac: string;
 
-    constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
+    constructor(parent: Entity, m: Manifest, data: any ) {
         this.ac = data.ac;
     }
 }
@@ -198,7 +206,7 @@ export class Weapon {
     damage: string;
     type: string;
 
-    constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
+    constructor(parent: Entity, m: Manifest, data: any ) {
         this.damage = data.damage;
         this.type = data.type;
     }
@@ -209,7 +217,7 @@ export class Vehicle {
     capacity: string;
     workers: string;
 
-    constructor(parent: Entity, m: { [key: string]: any }, data: any ) {
+    constructor(parent: Entity, m: Manifest, data: any ) {
         this.speed = data.speed;
         this.capacity = data.capacity;
         this.workers = data.workers;
