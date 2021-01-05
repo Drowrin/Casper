@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node ./build/server.js",
-    "casper": "node ./build/casper.js"
+    "casper": "node ./build/casper.js",
+    "dev": "npm run build && npm start"
   },
   "author": "Jordan Bates <drowrin@gmail.com>",
   "license": "MIT",
