@@ -5,7 +5,7 @@
 // The root of each yaml file should be an array. As such, each entity should start with a "-".
 // This is true even if a file contains only one entity.
 
-// TODO: dependency structure? for example: Weapon requires Equipment? Category requires Description?
+// TODO: dependency structure? for example: Weapon requires Item? Category requires Description?
 
 export interface EntityData {
     /**
@@ -21,7 +21,7 @@ export interface EntityData {
     id: string,
 
     /**
-     * Every entity should have at least one category, such as "weapon" or "equipment".
+     * Every entity should have at least one category, such as "weapon".
      * Categories are also defined by entities, with the id convention "category$<category-name>"".
      * Strings in this list should refer to categories by id. The "category$" prefix is automatically added.
      * Example:
@@ -57,9 +57,9 @@ export interface EntityData {
 
     /**
      * Any entity that is a physical item with at least cost and weight should have this component.
-     * This should be present on all equipment, even if all optional fields are skipped.
+     * This should be present on all items, even if all optional fields are skipped.
      */
-    equipment?: EquipmentData,
+    item?: ItemData,
 
     /**
      * If an entity is armor, it should include this component.
@@ -136,20 +136,59 @@ export interface PropertyRef {
     [key: string]: any
 }
 
-// TODO: handle "materials" like paper and ink, planks, ingots? Optional "bundle" and "unit" fields?
-// TODO: rename to "item" or something to be more general?
-export interface EquipmentData {
+export interface ValueData {
     /**
-     * String including coinage, if the item has a value. For example "10 gp".
-     * @TJS-pattern ^(((\d+,?)*\d+ (pp|gp|ep|sp|cp)) ?)+$
+     * Platinum pieces
+     * @type integer
+     * @minimum 1
      */
-    cost?: string,
+    pp?: number,
 
     /**
-     * String including unit. For example "5 lb" or "2.25 lb".
-     * @TJS-pattern ^\d?\.?\d+ lb$
+     * Gold pieces
+     * @minimum 1
      */
-    weight?: string,
+    gp?: number,
+    
+    /**
+     * Electrum pieces
+     * @type integer
+     * @minimum 1
+     */
+    ep?: number,
+    
+    /**
+     * Silver pieces
+     * @type integer
+     * @minimum 1
+     */
+    sp?: number,
+    
+    /**
+     * Copper pieces
+     * @type integer
+     * @minimum 1
+     */
+    cp?: number,
+}
+
+export interface ItemData {
+    /**
+     * Value of this item. Optional for priceless items or items of negligible worth.
+     */
+    cost?: ValueData,
+
+    /**
+     * Weight of this item in lb.
+     */
+    weight?: number,
+
+    /**
+     * Default bundle for things like arrows.
+     * Cost/weight of an individual item is <recorded number> / <bundle>
+     * @default 1
+     */
+    bundle: number,
 }
 
 export interface ArmorData {
@@ -177,7 +216,7 @@ export interface WeaponData {
 
 // All three attributes can be null if they do not apply to a particular vehicle.
 // All three attributes can be simple stats (like "30 mph") or short sentences describing properties of the vehicle.
-// TODO: move some of this into equipment properties?
+// TODO: move some of this into properties?
 export interface VehicleData {
     speed?: string,
     capacity?: string,
@@ -224,7 +263,7 @@ export interface ToolUseData {
     description: string,
 }
 
-// TODO: change `supplies` to reference other item/equipment entities?
+// TODO: change `supplies` to reference other item entities?
 // TODO: change `skills` to reference and augment skill entities, similar to how Properties work?
 export interface ToolData {
     /**

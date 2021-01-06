@@ -19,7 +19,7 @@ export class Entity {
 
     // optional components
     // if the raw data contains a matching field, it is resolved into a component
-    equipment?:Equipment;
+    item?:Item;
     properties?:ResolvedProperty[];
     tool?:Tool;
     property?:Property;
@@ -36,7 +36,7 @@ export class Entity {
 
         this.description = data.description;
 
-        if (data.equipment) this.equipment = new Equipment(this, m, data.equipment);
+        if (data.item) this.item = new Item(this, m, data.item);
         if (data.properties) this.properties = data.properties.map(Property.resolver(this, m));
         if (data.tool) this.tool = new Tool(this, m, data.tool);
         if (data.property) this.property = new Property(this, m, data.property);
@@ -47,11 +47,11 @@ export class Entity {
     }
 }
 
-export class Equipment {
-    cost?: string;
-    weight?: string;
+export class Item {
+    cost?: schema.ValueData;
+    weight?: number;
 
-    constructor(parent: Entity, m: Manifest, data: schema.EquipmentData) {
+    constructor(parent: Entity, m: Manifest, data: schema.ItemData) {
         this.cost = data.cost;
         this.weight = data.weight;
     }
