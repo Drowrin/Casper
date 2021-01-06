@@ -18,3 +18,13 @@ To build and then run the dev build
 ```npm run dev```
 
 Data may be viewed at `localhost:3001`. In the future, this will be configurable for dev builds. [balthasar](https://github.com/Drowrin/balthasar) provides a frontend for the data.
+
+## Powered By...
+* [TypeScript](https://www.typescriptlang.org/)
+* [Express](https://expressjs.com/)
+* [cors](https://www.npmjs.com/package/cors)
+* [Fuse.js](https://fusejs.io/)
+* [js-yaml](https://www.npmjs.com/package/js-yaml)
+* [object-hash](https://www.npmjs.com/package/object-hash)
+* [Ajv](https://ajv.js.org/)
+* [typescript-json-schema](https://github.com/YousefED/typescript-json-schema)
