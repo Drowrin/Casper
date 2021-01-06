@@ -49,7 +49,7 @@ function loadFiles(mainDataDir: string, schemaDir: string): EntityData[] {
 
     // load all the files into one big array of all raw entities
     var out: EntityData[] = [];
-    var errors: {[key: string]: ErrorObject[]} = {};
+    var errors: {[key: string]: any[]} = {};
     for (const file of allFiles) {
         const entities = <any> yaml.safeLoad(
             <string><any> fs.readFileSync(file)
@@ -64,7 +64,13 @@ function loadFiles(mainDataDir: string, schemaDir: string): EntityData[] {
             
             const valid = ajv.validate(schema, entity);
 
-            if (!valid) errors[entity.id] = ajv.errors ?? [];
+            if (!valid) errors[entity.id] = ajv.errors?.map(err => {
+                const {keyword, dataPath, message, parentSchema, data} = err;
+
+                if (keyword === 'additionalProperties' && dataPath === '') return "Unrecognized component!";
+
+                return {keyword, dataPath, message, parentSchema, data};
+            }) ?? [];
         }
 
         out = out.concat(<EntityData[]>entities);
@@ -72,7 +78,7 @@ function loadFiles(mainDataDir: string, schemaDir: string): EntityData[] {
 
     if (Object.keys(errors).length > 0) {
         console.log("Data validation failed!");
-        console.log(errors);
+        console.log(JSON.stringify(errors, null, 2));
         exit();
     }
 
