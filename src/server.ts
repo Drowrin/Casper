@@ -5,7 +5,7 @@ import { Casper } from "./casper";
 
 // Load, validate, and resolve entities
 // If there are issues loading the data, the app will display errors and close here.
-const casper = new Casper('./data');
+const casper = new Casper('./data', './schema.json');
 
 console.log(`Loaded ${casper.length} entities!`);
 console.log(`Manifest Size: ${Buffer.byteLength(JSON.stringify(casper), 'utf-8')} bytes`);

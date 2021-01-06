@@ -1,5 +1,7 @@
+import * as schema from "./schema";
+
 type SMap<t> = { [key:string]: t }
-type Manifest = SMap<any>
+type Manifest = SMap<schema.EntityData>
 
 /**
  * The core of all casper data. Everything is an entity.
@@ -26,7 +28,7 @@ export class Entity {
     weapon?:Weapon;
     vehicle?:Vehicle;
 
-    constructor(m: Manifest, data: any) {
+    constructor(m: Manifest, data: schema.EntityData) {
         this.name = data.name;
         this.id = data.id;
 
@@ -46,10 +48,10 @@ export class Entity {
 }
 
 export class Equipment {
-    cost: string;
-    weight: string;
+    cost?: string;
+    weight?: string;
 
-    constructor(parent: Entity, m: Manifest, data: any) {
+    constructor(parent: Entity, m: Manifest, data: schema.EquipmentData) {
         this.cost = data.cost;
         this.weight = data.weight;
     }
@@ -57,23 +59,18 @@ export class Equipment {
 
 export class Tool {
     proficiency: string;
-    skills: {name: string, description: string}[];
-    supplies: {name: string, cost: string, weight: string, description: string}[];
-    activities: {description: string, dc: string}[];
-    uses: {name: string, description: string}[];
+    skills?: {name: string, description: string}[];
+    supplies?: {name: string, cost: string, weight: string, description: string}[];
+    activities?: {description: string, dc: string}[];
+    uses?: {name: string, description: string}[];
 
-    constructor(parent: Entity, m: Manifest, data: any) {
+    constructor(parent: Entity, m: Manifest, data: schema.ToolData) {
         this.proficiency = data.proficiency;
         this.skills = data.skills;
         this.supplies = data.supplies;
-        this.uses = data.uses;
         this.activities = data.activities;
+        this.uses = data.uses;
     }
-}
-
-type Ref = {
-    ref: string,
-    [key: string]: any
 }
 
 interface ResolvedProperty {
@@ -84,15 +81,14 @@ interface ResolvedProperty {
     args: SMap<any>,
 }
 
-
 export class Property {
     categories: string[];
     args: string[];
     description: string;
-    display: string;
+    display?: string;
     entities: string[];
 
-    constructor(parent: Entity, m: Manifest, data: any) {
+    constructor(parent: Entity, m: Manifest, data: schema.PropertyData) {
         this.categories = data.categories;
         this.args = data.args;
         this.description = data.description;
@@ -101,8 +97,8 @@ export class Property {
         // collect a list of ids of all entities that contain this property
         const name = parent.id.split('$')[1];
         this.entities = [];
-        for (const k in m) {
-            if (m[k].properties && m[k].properties.some((prop: any) => prop.ref === name)){
+        for (const [k, v] of Object.entries(m)) {
+            if (v.properties?.some((prop: schema.PropertyRef) => prop.ref === name)){
                 this.entities.push(k);
             }
         }
@@ -116,7 +112,7 @@ export class Property {
         /**
          * Resolves a Property reference into a ResolvedProperty.
          */
-        return function (prop: Ref): ResolvedProperty {
+        return function (prop: schema.PropertyRef): ResolvedProperty {
             // expand ref into full id and get the property entity.
             const ref = `property$${prop.ref}`;
             const entity = m[ref];
@@ -126,8 +122,11 @@ export class Property {
             
             const property = entity.property;
 
+            if (property === undefined)
+                throw `${parent.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`
+
             // check that the parent entity belongs to at least one of the categories this property requires.
-            if (property.categories.length > 0 && !property.categories.some((c: any) => m[parent.id].categories.includes(c)))
+            if (property.categories.length > 0 && !property.categories.some((c: string) => m[parent.id].categories.includes(c)))
                 throw `${parent.id} [${m[parent.id].categories}] does not match any possible categories for ${ref} [${property.categories}]!`
             
             // process display and description with arg values. replace <argname> with the arg values.
@@ -165,7 +164,7 @@ interface ResolvedCategory {
 export class Category {
     entities: string[];
 
-    constructor(parent: Entity, m: Manifest, data: any ) {
+    constructor(parent: Entity, m: Manifest, data: schema.CategoryData ) {
         // collect a list of ids of all entities that are in this category
         const name = parent.id.split('$')[1];
         this.entities = [];
@@ -194,36 +193,36 @@ export class Category {
             return {
                 name: entity.name,
                 id: entity.id,
-                description: entity.description
+                description: <string> entity.description // TODO: require description with category in validation
             };
         };
     }
 }
 
 export class Armor {
-    ac: string;
+    ac: string | number;
 
-    constructor(parent: Entity, m: Manifest, data: any ) {
+    constructor(parent: Entity, m: Manifest, data: schema.ArmorData ) {
         this.ac = data.ac;
     }
 }
 
 export class Weapon {
-    damage: string;
-    type: string;
+    damage?: string | number;
+    type?: string;
 
-    constructor(parent: Entity, m: Manifest, data: any ) {
+    constructor(parent: Entity, m: Manifest, data: schema.WeaponData ) {
         this.damage = data.damage;
         this.type = data.type;
     }
 }
 
 export class Vehicle {
-    speed: string;
-    capacity: string;
-    workers: string;
+    speed?: string;
+    capacity?: string;
+    workers?: string;
 
-    constructor(parent: Entity, m: Manifest, data: any ) {
+    constructor(parent: Entity, m: Manifest, data: schema.VehicleData ) {
         this.speed = data.speed;
         this.capacity = data.capacity;
         this.workers = data.workers;
