@@ -160,7 +160,7 @@ export class Casper {
                     weight: 1
                 },
                 {
-                    name: 'components.equipment.properties.name',
+                    name: 'components.properties.name',
                     weight: 1
                 },
             ],
