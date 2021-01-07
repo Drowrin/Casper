@@ -172,6 +172,7 @@ export interface ValueData {
     cp?: number,
 }
 
+// TODO: variants? ingot types for example?
 export interface ItemData {
     /**
      * Value of this item. Optional for priceless items or items of negligible worth.
