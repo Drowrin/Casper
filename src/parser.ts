@@ -14,6 +14,9 @@ export class Entity {
     id: string;
     categories: ResolvedCategory[];
 
+    // optional. displayed alongside an entity if present.
+    img?: Img;
+
     // optional. brief description of this entity.
     description?: string;
 
@@ -36,6 +39,8 @@ export class Entity {
 
         this.description = data.description;
 
+        if (data.img) this.img = new Img(this, m, data.img);
+
         if (data.item) this.item = new Item(this, m, data.item);
         if (data.properties)
             this.properties = data.properties.map(Property.resolver(this, m));
@@ -45,6 +50,14 @@ export class Entity {
         if (data.armor) this.armor = new Armor(this, m, data.armor);
         if (data.weapon) this.weapon = new Weapon(this, m, data.weapon);
         if (data.vehicle) this.vehicle = new Vehicle(this, m, data.vehicle);
+    }
+}
+
+export class Img {
+    uri: string;
+
+    constructor(parent: Entity, m: Manifest, data: schema.ImgData) {
+        this.uri = data.uri;
     }
 }
 

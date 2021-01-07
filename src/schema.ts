@@ -40,6 +40,11 @@ export interface EntityData {
     description?: string;
 
     /**
+     * Optional image to be displayed with an entity.
+     */
+    img?: ImgData;
+
+    /**
      * If this entity defines a category, this should be `true`. Otherwise ignore.
      */
     category?: CategoryData;
@@ -81,6 +86,13 @@ export interface EntityData {
      * For example: tools, vehicles, and instruments.
      */
     tool?: ToolData;
+}
+
+export interface ImgData {
+    /**
+     * @TJS-format uri-reference
+     */
+    uri: string;
 }
 
 export interface CategoryData {

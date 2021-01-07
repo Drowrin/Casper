@@ -3,6 +3,7 @@ import fs = require('fs');
 import path = require('path');
 import Fuse from 'fuse.js';
 import Ajv, { ErrorObject } from 'ajv';
+import addFormats from 'ajv-formats';
 import { EntityData } from './schema';
 import { Entity } from './parser';
 import { exit } from 'process';
@@ -18,6 +19,7 @@ function loadFiles(mainDataDir: string, schemaDir: string): EntityData[] {
         allowUnionTypes: true,
         verbose: true,
     });
+    addFormats(ajv);
 
     /**
      * Recurse through directories and gather paths to all yaml files.
