@@ -169,7 +169,7 @@ export class Property {
     display?: string;
     entities: string[];
 
-    constructor(parent: Entity, m: Manifest, data: schema.PropertyData) {
+    constructor(data: schema.PropertyData, parent: Entity, m: Manifest) {
         this.categories = data.categories;
         this.args = data.args;
         this.description = data.description;
