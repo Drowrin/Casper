@@ -382,12 +382,12 @@ export interface SpellData {
     /**
      * The ability of the saving throw required by the spell, if any.
      */
-    savingThrow?: string;
+    savingThrow?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
 
     /**
-     * Whether or not the spell requires an attack roll.
+     * Whether or not the spell's attack roll is melee or ranged, if any.
      */
-    attack?: boolean;
+    attack?: 'melee' | 'ranged';
 
     /**
      * The amount of damage the spell deals, if any.
