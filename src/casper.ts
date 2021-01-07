@@ -2,9 +2,9 @@ import yaml = require('js-yaml');
 import fs = require('fs');
 import path = require('path');
 import Fuse from 'fuse.js';
-import Ajv, { ErrorObject } from "ajv";
-import { EntityData } from "./schema";
-import { Entity } from "./parser";
+import Ajv, { ErrorObject } from 'ajv';
+import { EntityData } from './schema';
+import { Entity } from './parser';
 import { exit } from 'process';
 
 /**
@@ -13,25 +13,25 @@ import { exit } from 'process';
  * Returns a map of ids to entities
  */
 function loadFiles(mainDataDir: string, schemaDir: string): EntityData[] {
-    const schema = JSON.parse(<string><any> fs.readFileSync(schemaDir));
+    const schema = JSON.parse(<string>(<any>fs.readFileSync(schemaDir)));
     const ajv = new Ajv({
         allowUnionTypes: true,
         verbose: true,
     });
-    
+
     /**
      * Recurse through directories and gather paths to all yaml files.
      */
     function loadFilesInner(dataDir: string): string[] {
         var out: string[] = [];
-    
+
         // iterate through each file in the current directory
         for (const file of fs.readdirSync(dataDir)) {
             // the full path to this particular file
             var pathString = path.join(dataDir, file);
             // read various stats about the file. Used here to determine if a path points to a directory or a file.
             var stats = fs.lstatSync(pathString);
-            
+
             if (stats.isFile() && file.endsWith('.yml')) {
                 // if the path points to a yaml file, add it to the output
                 out.push(pathString);
@@ -40,7 +40,7 @@ function loadFiles(mainDataDir: string, schemaDir: string): EntityData[] {
                 out = out.concat(loadFilesInner(dataDir));
             }
         }
-    
+
         return out;
     }
 
@@ -49,42 +49,61 @@ function loadFiles(mainDataDir: string, schemaDir: string): EntityData[] {
 
     // load all the files into one big array of all raw entities
     var out: EntityData[] = [];
-    var errors: {[key: string]: any[]} = {};
+    var errors: { [key: string]: any[] } = {};
     for (const file of allFiles) {
-        const entities = <any> yaml.safeLoad(
-            <string><any> fs.readFileSync(file)
+        const entities = <any>(
+            yaml.safeLoad(<string>(<any>fs.readFileSync(file)))
         );
 
         if (!Array.isArray(entities))
-            throw `File ${file} not an array of entities`
+            throw `File ${file} not an array of entities`;
 
         for (const entity of entities) {
             if (entity.id === undefined)
-                throw `File ${file} contains an entity without an id: ${JSON.stringify(entity)}`
-            
+                throw `File ${file} contains an entity without an id: ${JSON.stringify(
+                    entity
+                )}`;
+
             const valid = ajv.validate(schema, entity);
 
-            if (!valid) errors[entity.id] = ajv.errors?.map(err => {
-                const {keyword, dataPath, message, parentSchema, data} = err;
+            if (!valid)
+                errors[entity.id] =
+                    ajv.errors?.map((err) => {
+                        const {
+                            keyword,
+                            dataPath,
+                            message,
+                            parentSchema,
+                            data,
+                        } = err;
 
-                if (keyword === 'additionalProperties' && dataPath === '') return "Unrecognized component!";
+                        if (
+                            keyword === 'additionalProperties' &&
+                            dataPath === ''
+                        )
+                            return 'Unrecognized component!';
 
-                return {keyword, dataPath, message, parentSchema, data};
-            }) ?? [];
+                        return {
+                            keyword,
+                            dataPath,
+                            message,
+                            parentSchema,
+                            data,
+                        };
+                    }) ?? [];
         }
 
         out = out.concat(<EntityData[]>entities);
     }
 
     if (Object.keys(errors).length > 0) {
-        console.log("Data validation failed!");
+        console.log('Data validation failed!');
         console.log(JSON.stringify(errors, null, 2));
         exit();
     }
 
     return out;
 }
-
 
 type EntityMap = { [key: string]: Entity };
 
@@ -95,8 +114,7 @@ function resolveEntities(ent: EntityData[]): EntityMap {
     // Initial validation of data. Sort into id -> entity map so that entities can reference each other while resolving
     var d: { [key: string]: EntityData } = {};
     for (var e of ent) {
-        if (e.id in d)
-            throw `Duplicate id ${e.id}\n${e.name}\n${d[e.id].name}`
+        if (e.id in d) throw `Duplicate id ${e.id}\n${e.name}\n${d[e.id].name}`;
 
         d[e.id] = e;
     }
@@ -107,7 +125,7 @@ function resolveEntities(ent: EntityData[]): EntityMap {
     for (var key in d) {
         out[key] = new Entity(d, d[key]);
     }
-    
+
     return out;
 }
 
@@ -147,24 +165,24 @@ export class Casper {
                     name: 'name',
                     weight: 2,
                 },
-                { 
+                {
                     name: 'id',
-                    weight: 1.5
+                    weight: 1.5,
                 },
                 {
                     name: 'description',
-                    weight: 0.2
+                    weight: 0.2,
                 },
                 {
                     name: 'components.categories.name',
-                    weight: 1
+                    weight: 1,
                 },
                 {
                     name: 'components.properties.name',
-                    weight: 1
+                    weight: 1,
                 },
             ],
-            Object.values(this.entities),
+            Object.values(this.entities)
         );
     }
 }
