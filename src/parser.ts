@@ -161,6 +161,7 @@ export class ResolvedProperty {
     }
 }
 
+@component('property')
 export class Property {
     categories: string[];
     args: string[];
