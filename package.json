@@ -6,7 +6,8 @@
     "scripts": {
         "build-validator": "typescript-json-schema --noExtraProps ./src/schema.ts EntityData -o schema.json",
         "build-typescript": "tsc",
-        "build": "run-s build-validator build-typescript",
+        "prettier": "prettier --write .",
+        "build": "run-s prettier build-validator build-typescript",
         "start": "node ./build/server.js",
         "casper": "node ./build/casper.js",
         "dev": "run-s build start"
