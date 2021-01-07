@@ -56,6 +56,11 @@ export interface EntityData {
     properties?: PropertyRef[],
 
     /**
+     * If an entity is a spell, it should include this component.
+     */
+    spell?: SpellData,
+
+    /**
      * Any entity that is a physical item with at least cost and weight should have this component.
      * This should be present on all items, even if all optional fields are skipped.
      */
@@ -173,6 +178,21 @@ export interface ValueData {
 }
 
 // TODO: variants? ingot types for example?
+export interface SpellData {
+    /**
+     * How much damage the weapon does.
+     * This should be dice or a flat amount.
+     * Optional -- useful for weapons like the Net.
+     */
+    damage?: string | number,
+
+    /**
+     * Damage type the weapon does. For example "Bludgeoning".
+     * Optional -- useful for weapons like the Net.
+     */
+    type?: string,
+}
+
 export interface ItemData {
     /**
      * Value of this item. Optional for priceless items or items of negligible worth.
@@ -291,4 +311,8 @@ export interface ToolData {
      * Tasks that are more complex than activities and generally have more defined rules.
      */
     uses?: ToolUseData[];
+}
+
+export interface SpellData {
+    school: string,
 }
