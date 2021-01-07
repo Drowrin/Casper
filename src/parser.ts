@@ -1,7 +1,7 @@
-import * as schema from "./schema";
+import * as schema from './schema';
 
-type SMap<t> = { [key:string]: t }
-type Manifest = SMap<schema.EntityData>
+type SMap<t> = { [key: string]: t };
+type Manifest = SMap<schema.EntityData>;
 
 /**
  * The core of all casper data. Everything is an entity.
@@ -19,14 +19,14 @@ export class Entity {
 
     // optional components
     // if the raw data contains a matching field, it is resolved into a component
-    item?:Item;
-    properties?:ResolvedProperty[];
-    tool?:Tool;
-    property?:Property;
-    category?:Category;
-    armor?:Armor;
-    weapon?:Weapon;
-    vehicle?:Vehicle;
+    item?: Item;
+    properties?: ResolvedProperty[];
+    tool?: Tool;
+    property?: Property;
+    category?: Category;
+    armor?: Armor;
+    weapon?: Weapon;
+    vehicle?: Vehicle;
 
     constructor(m: Manifest, data: schema.EntityData) {
         this.name = data.name;
@@ -37,7 +37,8 @@ export class Entity {
         this.description = data.description;
 
         if (data.item) this.item = new Item(this, m, data.item);
-        if (data.properties) this.properties = data.properties.map(Property.resolver(this, m));
+        if (data.properties)
+            this.properties = data.properties.map(Property.resolver(this, m));
         if (data.tool) this.tool = new Tool(this, m, data.tool);
         if (data.property) this.property = new Property(this, m, data.property);
         if (data.category) this.category = new Category(this, m, data.category);
@@ -59,10 +60,15 @@ export class Item {
 
 export class Tool {
     proficiency: string;
-    skills?: {name: string, description: string}[];
-    supplies?: {name: string, cost: string, weight: string, description: string}[];
-    activities?: {description: string, dc: string}[];
-    uses?: {name: string, description: string}[];
+    skills?: { name: string; description: string }[];
+    supplies?: {
+        name: string;
+        cost: string;
+        weight: string;
+        description: string;
+    }[];
+    activities?: { description: string; dc: string }[];
+    uses?: { name: string; description: string }[];
 
     constructor(parent: Entity, m: Manifest, data: schema.ToolData) {
         this.proficiency = data.proficiency;
@@ -74,11 +80,11 @@ export class Tool {
 }
 
 interface ResolvedProperty {
-    name: string,
-    id: string,
-    description: string,
-    display: string,
-    args: SMap<any>,
+    name: string;
+    id: string;
+    description: string;
+    display: string;
+    args: SMap<any>;
 }
 
 export class Property {
@@ -98,7 +104,11 @@ export class Property {
         const name = parent.id.split('$')[1];
         this.entities = [];
         for (const [k, v] of Object.entries(m)) {
-            if (v.properties?.some((prop: schema.PropertyRef) => prop.ref === name)){
+            if (
+                v.properties?.some(
+                    (prop: schema.PropertyRef) => prop.ref === name
+                )
+            ) {
                 this.entities.push(k);
             }
         }
@@ -118,17 +128,26 @@ export class Property {
             const entity = m[ref];
 
             if (entity === undefined)
-                throw `${parent.id} contains an undefined reference: "${ref}"!`
-            
+                throw `${parent.id} contains an undefined reference: "${ref}"!`;
+
             const property = entity.property;
 
             if (property === undefined)
-                throw `${parent.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`
+                throw `${parent.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`;
 
             // check that the parent entity belongs to at least one of the categories this property requires.
-            if (property.categories.length > 0 && !property.categories.some((c: string) => m[parent.id].categories.includes(c)))
-                throw `${parent.id} [${m[parent.id].categories}] does not match any possible categories for ${ref} [${property.categories}]!`
-            
+            if (
+                property.categories.length > 0 &&
+                !property.categories.some((c: string) =>
+                    m[parent.id].categories.includes(c)
+                )
+            )
+                throw `${parent.id} [${
+                    m[parent.id].categories
+                }] does not match any possible categories for ${ref} [${
+                    property.categories
+                }]!`;
+
             // process display and description with arg values. replace <argname> with the arg values.
             var description = property.description;
             var display = property.display || entity.name;
@@ -137,39 +156,39 @@ export class Property {
                 // get arg value if it exists. throw error if it doesn't exist
                 var val = prop[arg];
                 if (val === undefined)
-                    throw `property ${entity.name} of ${parent.id} is missing arg "${arg}"!`
+                    throw `property ${entity.name} of ${parent.id} is missing arg "${arg}"!`;
 
                 description = description.replace(`<${arg}>`, val);
                 display = display.replace(`<${arg}>`, val);
                 argmap[arg] = val;
             }
-            
+
             return {
                 name: entity.name,
-                id: entity.id, 
+                id: entity.id,
                 description,
                 display,
-                args: argmap
+                args: argmap,
             };
-        }
+        };
     }
 }
 
 interface ResolvedCategory {
-    name: string,
-    id: string,
-    description: string,
+    name: string;
+    id: string;
+    description: string;
 }
 
 export class Category {
     entities: string[];
 
-    constructor(parent: Entity, m: Manifest, data: schema.CategoryData ) {
+    constructor(parent: Entity, m: Manifest, data: schema.CategoryData) {
         // collect a list of ids of all entities that are in this category
         const name = parent.id.split('$')[1];
         this.entities = [];
         for (const k in m) {
-            if (m[k].categories.includes(name)){
+            if (m[k].categories.includes(name)) {
                 this.entities.push(k);
             }
         }
@@ -188,12 +207,12 @@ export class Category {
             const entity = m[fullRef];
 
             if (entity === undefined)
-                throw `${parent.id} contains an undefined reference: "${fullRef}"!`
-            
+                throw `${parent.id} contains an undefined reference: "${fullRef}"!`;
+
             return {
                 name: entity.name,
                 id: entity.id,
-                description: <string> entity.description // TODO: require description with category in validation
+                description: <string>entity.description, // TODO: require description with category in validation
             };
         };
     }
@@ -202,7 +221,7 @@ export class Category {
 export class Armor {
     ac: string | number;
 
-    constructor(parent: Entity, m: Manifest, data: schema.ArmorData ) {
+    constructor(parent: Entity, m: Manifest, data: schema.ArmorData) {
         this.ac = data.ac;
     }
 }
@@ -211,7 +230,7 @@ export class Weapon {
     damage?: string | number;
     type?: string;
 
-    constructor(parent: Entity, m: Manifest, data: schema.WeaponData ) {
+    constructor(parent: Entity, m: Manifest, data: schema.WeaponData) {
         this.damage = data.damage;
         this.type = data.type;
     }
@@ -222,7 +241,7 @@ export class Vehicle {
     capacity?: string;
     workers?: string;
 
-    constructor(parent: Entity, m: Manifest, data: schema.VehicleData ) {
+    constructor(parent: Entity, m: Manifest, data: schema.VehicleData) {
         this.speed = data.speed;
         this.capacity = data.capacity;
         this.workers = data.workers;
