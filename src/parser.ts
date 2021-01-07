@@ -22,14 +22,7 @@ export class Entity {
 
     // optional components
     // if the raw data contains a matching field, it is resolved into a component
-    item?: Item;
-    properties?: ResolvedProperty[];
-    tool?: Tool;
-    property?: Property;
-    category?: Category;
-    armor?: Armor;
-    weapon?: Weapon;
-    vehicle?: Vehicle;
+    [key: string]: any;
 
     constructor(m: Manifest, data: schema.EntityData) {
         this.name = data.name;
@@ -39,7 +32,10 @@ export class Entity {
 
         this.description = data.description;
 
-        if (data.img) this.img = new Img(this, m, data.img);
+        // if (data.img) this.img = new Img(this, m, data.img);
+        for (const comp of components) {
+            comp.resolve?.(this, m, data);
+        }
 
         if (data.item) this.item = new Item(this, m, data.item);
         if (data.properties)
@@ -53,11 +49,48 @@ export class Entity {
     }
 }
 
+var components: Component[] = [];
+
+interface Component {
+    new (...args: any[]): {};
+    array?: boolean;
+    computed?<D>(e: Entity, m: Manifest, d: D): { [key: string]: any };
+    resolve?(entity: Entity, m: Manifest, ed: any): void;
+}
+
+function component(key: string) {
+    return function <T extends Component>(Base: T) {
+        class c extends Base {
+            static resolve(entity: Entity, m: Manifest, ed: any) {
+                const data = ed[key];
+
+                if (data !== undefined) {
+                    if (this.array)
+                        entity[key] = data.map(
+                            (d: any) =>
+                                new this(d, this.computed?.(entity, m, d))
+                        );
+
+                    entity[key] = new this(
+                        data,
+                        this.computed?.(entity, m, data)
+                    );
+                }
+            }
+        }
+
+        components.push(c);
+
+        return Base;
+    };
+}
+
+@component('img')
 export class Img {
     uri: string;
 
-    constructor(parent: Entity, m: Manifest, data: schema.ImgData) {
-        this.uri = data.uri;
+    constructor({ uri }: schema.ImgData) {
+        this.uri = uri;
     }
 }
 
