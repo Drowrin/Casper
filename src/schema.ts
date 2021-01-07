@@ -178,21 +178,6 @@ export interface ValueData {
 }
 
 // TODO: variants? ingot types for example?
-export interface SpellData {
-    /**
-     * How much damage the weapon does.
-     * This should be dice or a flat amount.
-     * Optional -- useful for weapons like the Net.
-     */
-    damage?: string | number;
-
-    /**
-     * Damage type the weapon does. For example "Bludgeoning".
-     * Optional -- useful for weapons like the Net.
-     */
-    type?: string;
-}
-
 export interface ItemData {
     /**
      * Value of this item. Optional for priceless items or items of negligible worth.
@@ -313,9 +298,40 @@ export interface ToolData {
     uses?: ToolUseData[];
 }
 
+export interface DamageData {
+    /**
+     * How much damage it does.
+     * This should be dice or a flat amount.
+     */
+    damage: string | number;
+
+    /**
+     * Damage type it does. For example "Force".
+     */
+    type: string;
+}
+
+export interface ComponentData {
+    /**
+     * Whether or not the spell requires a verbal component.
+     */
+    verbal: boolean;
+
+    /**
+     * Whether or not the spell requires a somatic component.
+     */
+    somatic: boolean;
+
+    /**
+     * Whether or not the spell requires a material component.
+     * If true, then the value is a string containing the necessary component.
+     */
+    material: false | string;
+}
+
 export interface SpellData {
     /**
-     * The base level that the spell is cast at
+     * The base level that the spell can be cast at.
      * @type integer
      * @minimum 1
      * @maximum 9
@@ -328,7 +344,60 @@ export interface SpellData {
     school: string;
 
     /**
-     * The school of magic that the spell belongs to.
+     * The casting time of the spell.
      */
     castTime: string;
+
+    /**
+     * The range of the spell.
+     * This should be the number in feet or a string.
+     */
+    range: number | string;
+
+    /**
+     * The components required to cast the spell.
+     */
+    components: ComponentData;
+
+    /**
+     * Whether or not the spell has the ritual tag.
+     */
+    ritual: boolean;
+
+    /**
+     * Whether or not the spell requires concentration.
+     */
+    concentration: boolean;
+
+    /**
+     * The duration of time that the spell lasts.
+     */
+    duration: string;
+
+    /**
+     * The extra effects of the spell when cast at a higher level, if any.
+     */
+    higherLevel?: string;
+
+    /**
+     * The ability of the saving throw required by the spell, if any.
+     */
+    savingThrow?: string;
+
+    /**
+     * Whether or not the spell requires an attack roll.
+     */
+    attack?: boolean;
+
+    /**
+     * The amount of damage the spell deals, if any.
+     * Takes an array of DamageData nodes, useful for spells that deal multiple damage types.
+     */
+    damage?: Array<DamageData>;
+
+    /**
+     * The amount of healing the spell provides, if any.
+     * This should be dice or a flat amount.
+     */
+    healing?: string | number;
 }
