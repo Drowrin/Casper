@@ -6,7 +6,7 @@
 // This is true even if a file contains only one entity.
 
 // TODO: dependency structure? for example: Weapon requires Item? Category requires Description?
-
+export type Manifest = { [key: string]: EntityData };
 export interface EntityData {
     /**
      * Every entity needs a name. This does not have to be unique, just descriptive.
