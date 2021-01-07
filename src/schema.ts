@@ -314,5 +314,22 @@ export interface ToolData {
 }
 
 export interface SpellData {
+    /**
+    * The base level that the spell is cast at
+     * @type integer
+     * @minimum 1
+     * @maximum 9
+     */
+   level: number,
+
+   /**
+     * The school of magic that the spell belongs to.
+     */
     school: string,
+
+    /**
+     * The school of magic that the spell belongs to.
+     */
+    castTime: string,
+
 }
