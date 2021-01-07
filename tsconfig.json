@@ -5,6 +5,7 @@
 
     "compilerOptions": {
         "outDir": "build",
-        "experimentalDecorators": true
+        "experimentalDecorators": true,
+        "target": "es6"
     }
 }

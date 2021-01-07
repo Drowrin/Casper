@@ -125,7 +125,7 @@ function resolveEntities(ent: EntityData[]): EntityMap {
     // the Entity constructor does a lot. It recursively resolves and validates each component of this entity.
     var out: { [key: string]: Entity } = {};
     for (var key in d) {
-        out[key] = new Entity(d, d[key]);
+        out[key] = new Entity(d[key], d);
     }
 
     return out;
