@@ -13,8 +13,10 @@ import { exit } from 'process';
  * Each file is validated and references are replaced.
  * Returns a map of ids to entities
  */
-function loadFiles(mainDataDir: string, schemaDir: string): EntityData[] {
-    const schema = JSON.parse(<string>(<any>fs.readFileSync(schemaDir)));
+function loadFiles(mainDataDir: string): EntityData[] {
+    const schema = JSON.parse(
+        <string>(<any>fs.readFileSync('./build/validator.json'))
+    );
     const ajv = new Ajv({
         allowUnionTypes: true,
         verbose: true,
@@ -167,11 +169,11 @@ export class Casper {
     length: number;
     index: Fuse.FuseIndex<Entity>;
 
-    constructor(dataDir: string, schemaDir: string) {
+    constructor(dataDir: string) {
         try {
             // load files and perform initial validation
             // this array is not saved after it is transformed into a map of resolved Entity objects
-            var ent = loadFiles(dataDir, schemaDir);
+            var ent = loadFiles(dataDir);
 
             // count entities and set length property before the array is lost
             this.length = ent.length;
@@ -224,7 +226,7 @@ export class Casper {
 if (require.main === module) {
     var arg = process.argv.slice(2).join('$');
 
-    var casper = new Casper('./data', './schema.json');
+    var casper = new Casper('./data');
 
     console.log(JSON.stringify(casper.get(arg), null, 2));
 }

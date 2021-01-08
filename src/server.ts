@@ -4,7 +4,7 @@ import { Casper } from './casper';
 
 // Load, validate, and resolve entities
 // If there are issues loading the data, the app will display errors and close here.
-const casper = new Casper('./data', './schema.json');
+const casper = new Casper('./data');
 
 // This hash is used by the client to quickly determine if it needs to download new data.
 const casperHash = casper.hash();

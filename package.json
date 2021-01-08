@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build-validator": "typescript-json-schema --noExtraProps ./src/schema/index.ts EntityData -o schema.json",
+        "build-validator": "typescript-json-schema --noExtraProps ./src/schema/index.ts EntityData -o ./build/validator.json",
         "build-typescript": "tsc",
         "prettier": "prettier --write .",
         "build": "run-s prettier build-validator build-typescript",
