@@ -6,11 +6,6 @@ import { Casper } from './casper';
 // If there are issues loading the data, the app will display errors and close here.
 const casper = new Casper('./data');
 
-// This hash is used by the client to quickly determine if it needs to download new data.
-const casperHash = casper.hash();
-
-console.log(`Casper version hash: ${casperHash}`);
-
 // Prepare the express application, allowing CORS.
 const app = express();
 app.use(cors());
@@ -35,7 +30,7 @@ app.get('/entity/:id', (req, res) => {
  * Returns nothing else so that the client can compare hashes as quickly as possible.
  */
 app.get('/hash', (req, res) => {
-    res.send(casperHash);
+    res.send(casper.hash);
 });
 
 // Start the app and wait for requests.

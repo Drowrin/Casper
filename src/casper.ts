@@ -168,6 +168,7 @@ export class Casper {
     manifest: EntityMap;
     length: number;
     index: Fuse.FuseIndex<Entity>;
+    hash: string;
 
     constructor(dataDir: string) {
         try {
@@ -200,15 +201,10 @@ export class Casper {
                 'utf-8'
             )} bytes`
         );
-    }
 
-    /**
-     * This hash is used by the client to quickly determine if it needs to download new data.
-     */
-    hash() {
-        const casperHash = hash(this.manifest) + hash(this.index);
-        console.log(`Casper version hash: ${casperHash}`);
-        return casperHash;
+        this.hash = hash(this.manifest) + hash(this.index);
+
+        console.log(`Casper version hash: ${this.hash}`);
     }
 
     /**
