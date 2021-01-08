@@ -40,7 +40,7 @@ export function component(key: string) {
                     // check that the parent entity contains all of the other components required by this component
                     for (const req of this.required) {
                         if (ed[req] === undefined)
-                            throw `${entity.id} does not meet requirement for ${key}: ${req}`;
+                            throw `${entity.id} does not contain "${req}", which is a requirement for "${key}"`;
                     }
 
                     // If the data is an array, make an array of components.

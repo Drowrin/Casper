@@ -139,14 +139,19 @@ export class Casper {
     length: number;
 
     constructor(dataDir: string, schemaDir: string) {
-        // load files and perform initial validation
-        // this array is not saved after it is transformed into a map of resolved Entity objects
-        var ent = loadFiles(dataDir, schemaDir);
+        try {
+            // load files and perform initial validation
+            // this array is not saved after it is transformed into a map of resolved Entity objects
+            var ent = loadFiles(dataDir, schemaDir);
 
-        // count entities and set length property before the array is lost
-        this.length = ent.length;
+            // count entities and set length property before the array is lost
+            this.length = ent.length;
 
-        this.entities = resolveEntities(ent);
+            this.entities = resolveEntities(ent);
+        } catch (e) {
+            console.error(e);
+            exit();
+        }
     }
 
     /**
