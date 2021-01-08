@@ -1,4 +1,4 @@
-import { component } from './component';
+import { component, requires } from './component';
 
 export interface WeaponData {
     /**
@@ -16,6 +16,7 @@ export interface WeaponData {
 }
 
 @component('weapon')
+@requires('item')
 export class Weapon {
     damage?: string | number;
     type?: string;

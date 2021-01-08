@@ -1,4 +1,4 @@
-import { component } from './component';
+import { component, requires } from './component';
 
 export interface ArmorData {
     /**
@@ -9,6 +9,7 @@ export interface ArmorData {
 }
 
 @component('armor')
+@requires('item')
 export class Armor {
     ac: string | number;
 

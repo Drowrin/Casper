@@ -1,11 +1,12 @@
 import { Entity, Manifest } from '.';
-import { component } from './component';
+import { component, requires } from './component';
 
 export interface CategoryData {
     // Empty for now
 }
 
 @component('category')
+@requires('description')
 export class Category {
     entities: string[];
 

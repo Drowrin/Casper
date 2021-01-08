@@ -1,4 +1,4 @@
-import { component } from './component';
+import { component, requires } from './component';
 
 // TODO: convert to entities?
 export interface ToolSkillData {
@@ -70,6 +70,7 @@ export interface ToolData {
 }
 
 @component('tool')
+@requires('item')
 export class Tool {
     proficiency: string;
     skills?: { name: string; description: string }[];

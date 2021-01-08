@@ -1,5 +1,5 @@
 import { Entity, Manifest } from '.';
-import { component } from './component';
+import { component, requires } from './component';
 
 export interface PropertyData {
     /**
@@ -79,6 +79,7 @@ export interface PropertyRef {
 }
 
 @component('properties')
+@requires('item')
 export class ResolvedProperty {
     name: string;
     id: string;
