@@ -1,6 +1,7 @@
 import yaml = require('js-yaml');
 import fs = require('fs');
 import path = require('path');
+import hash = require('object-hash');
 import Fuse from 'fuse.js';
 import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
@@ -131,12 +132,40 @@ function resolveEntities(ent: EntityData[]): EntityMap {
 }
 
 /**
+ * Used by Fuse.js to generate a search index.
+ * See examples for more information: https://fusejs.io/examples.html
+ */
+const fuseKeys = [
+    {
+        name: 'name',
+        weight: 2,
+    },
+    {
+        name: 'id',
+        weight: 1.5,
+    },
+    {
+        name: 'description',
+        weight: 0.2,
+    },
+    {
+        name: 'components.categories.name',
+        weight: 1,
+    },
+    {
+        name: 'components.properties.name',
+        weight: 1,
+    },
+];
+
+/**
  * The core of the project; the main manifest.
  * Serialized to JSON before being sent to clients.
  */
 export class Casper {
-    entities: EntityMap;
+    manifest: EntityMap;
     length: number;
+    index: Fuse.FuseIndex<Entity>;
 
     constructor(dataDir: string, schemaDir: string) {
         try {
@@ -147,49 +176,44 @@ export class Casper {
             // count entities and set length property before the array is lost
             this.length = ent.length;
 
-            this.entities = resolveEntities(ent);
+            this.manifest = resolveEntities(ent);
         } catch (e) {
             console.error(e);
             exit();
         }
+
+        console.log(`Loaded ${this.length} entities!`);
+        console.log(
+            `Manifest Size: ${Buffer.byteLength(
+                JSON.stringify(this.manifest),
+                'utf-8'
+            )} bytes`
+        );
+
+        this.index = Fuse.createIndex(fuseKeys, Object.values(this.manifest));
+
+        console.log(
+            `Index generated! Size: ${Buffer.byteLength(
+                JSON.stringify(this.index),
+                'utf-8'
+            )} bytes`
+        );
+    }
+
+    /**
+     * This hash is used by the client to quickly determine if it needs to download new data.
+     */
+    hash() {
+        const casperHash = hash(this.manifest) + hash(this.index);
+        console.log(`Casper version hash: ${casperHash}`);
+        return casperHash;
     }
 
     /**
      * Get a particular entity by id.
      */
     get(id: string): Entity | undefined {
-        return this.entities[id];
-    }
-
-    /**
-     * Generate and return a search index for fuse.js.
-     */
-    index() {
-        return Fuse.createIndex(
-            [
-                {
-                    name: 'name',
-                    weight: 2,
-                },
-                {
-                    name: 'id',
-                    weight: 1.5,
-                },
-                {
-                    name: 'description',
-                    weight: 0.2,
-                },
-                {
-                    name: 'components.categories.name',
-                    weight: 1,
-                },
-                {
-                    name: 'components.properties.name',
-                    weight: 1,
-                },
-            ],
-            Object.values(this.entities)
-        );
+        return this.manifest[id];
     }
 }
 
