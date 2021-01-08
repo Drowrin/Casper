@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build-validator": "typescript-json-schema --noExtraProps ./src/schema.ts EntityData -o schema.json",
+        "build-validator": "typescript-json-schema --noExtraProps ./src/schema/index.ts EntityData -o ./build/validator.json",
         "build-typescript": "tsc",
         "prettier": "prettier --write .",
         "build": "run-s prettier build-validator build-typescript",
@@ -16,6 +16,7 @@
     "license": "MIT",
     "dependencies": {
         "ajv": "^7.0.3",
+        "ajv-formats": "^1.5.1",
         "cors": "^2.8.5",
         "express": "^4.17.1",
         "fuse.js": "^6.4.5",

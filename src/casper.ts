@@ -1,10 +1,11 @@
 import yaml = require('js-yaml');
 import fs = require('fs');
 import path = require('path');
+import hash = require('object-hash');
 import Fuse from 'fuse.js';
 import Ajv, { ErrorObject } from 'ajv';
-import { EntityData } from './schema';
-import { Entity } from './parser';
+import addFormats from 'ajv-formats';
+import { Entity, EntityData } from './schema';
 import { exit } from 'process';
 
 /**
@@ -12,12 +13,15 @@ import { exit } from 'process';
  * Each file is validated and references are replaced.
  * Returns a map of ids to entities
  */
-function loadFiles(mainDataDir: string, schemaDir: string): EntityData[] {
-    const schema = JSON.parse(<string>(<any>fs.readFileSync(schemaDir)));
+function loadFiles(mainDataDir: string): EntityData[] {
+    const schema = JSON.parse(
+        <string>(<any>fs.readFileSync('./build/validator.json'))
+    );
     const ajv = new Ajv({
         allowUnionTypes: true,
         verbose: true,
     });
+    addFormats(ajv);
 
     /**
      * Recurse through directories and gather paths to all yaml files.
@@ -123,67 +127,91 @@ function resolveEntities(ent: EntityData[]): EntityMap {
     // the Entity constructor does a lot. It recursively resolves and validates each component of this entity.
     var out: { [key: string]: Entity } = {};
     for (var key in d) {
-        out[key] = new Entity(d, d[key]);
+        out[key] = new Entity(d[key], d);
     }
 
     return out;
 }
 
 /**
+ * Used by Fuse.js to generate a search index.
+ * See examples for more information: https://fusejs.io/examples.html
+ */
+const fuseKeys = [
+    {
+        name: 'name',
+        weight: 2,
+    },
+    {
+        name: 'id',
+        weight: 1.5,
+    },
+    {
+        name: 'description',
+        weight: 0.2,
+    },
+    {
+        name: 'components.categories.name',
+        weight: 1,
+    },
+    {
+        name: 'components.properties.name',
+        weight: 1,
+    },
+];
+
+/**
  * The core of the project; the main manifest.
  * Serialized to JSON before being sent to clients.
  */
 export class Casper {
-    entities: EntityMap;
+    manifest: EntityMap;
     length: number;
+    index: Fuse.FuseIndex<Entity>;
+    hash: string;
 
-    constructor(dataDir: string, schemaDir: string) {
-        // load files and perform initial validation
-        // this array is not saved after it is transformed into a map of resolved Entity objects
-        var ent = loadFiles(dataDir, schemaDir);
+    constructor(dataDir: string) {
+        try {
+            // load files and perform initial validation
+            // this array is not saved after it is transformed into a map of resolved Entity objects
+            var ent = loadFiles(dataDir);
 
-        // count entities and set length property before the array is lost
-        this.length = ent.length;
+            // count entities and set length property before the array is lost
+            this.length = ent.length;
 
-        this.entities = resolveEntities(ent);
+            this.manifest = resolveEntities(ent);
+        } catch (e) {
+            console.error(e);
+            exit();
+        }
+
+        console.log(`Loaded ${this.length} entities!`);
+        console.log(
+            `Manifest Size: ${Buffer.byteLength(
+                JSON.stringify(this.manifest),
+                'utf-8'
+            )} bytes`
+        );
+
+        this.index = Fuse.createIndex(fuseKeys, Object.values(this.manifest));
+
+        console.log(
+            `Index generated! Size: ${Buffer.byteLength(
+                JSON.stringify(this.index),
+                'utf-8'
+            )} bytes`
+        );
+
+        this.hash = hash(this.manifest) + hash(this.index);
+
+        console.log(`Casper version hash: ${this.hash}`);
     }
 
     /**
      * Get a particular entity by id.
      */
     get(id: string): Entity | undefined {
-        return this.entities[id];
-    }
-
-    /**
-     * Generate and return a search index for fuse.js.
-     */
-    index() {
-        return Fuse.createIndex(
-            [
-                {
-                    name: 'name',
-                    weight: 2,
-                },
-                {
-                    name: 'id',
-                    weight: 1.5,
-                },
-                {
-                    name: 'description',
-                    weight: 0.2,
-                },
-                {
-                    name: 'components.categories.name',
-                    weight: 1,
-                },
-                {
-                    name: 'components.properties.name',
-                    weight: 1,
-                },
-            ],
-            Object.values(this.entities)
-        );
+        return this.manifest[id];
     }
 }
 
@@ -194,7 +222,7 @@ export class Casper {
 if (require.main === module) {
     var arg = process.argv.slice(2).join('$');
 
-    var casper = new Casper('./data', './schema.json');
+    var casper = new Casper('./data');
 
     console.log(JSON.stringify(casper.get(arg), null, 2));
 }
