@@ -2,7 +2,6 @@ import { component, requires } from './component';
 
 // All three attributes can be null if they do not apply to a particular vehicle.
 // All three attributes can be simple stats (like "30 mph") or short sentences describing properties of the vehicle.
-// TODO: move some of this into properties?
 export interface VehicleData {
     speed?: string;
     capacity?: string;

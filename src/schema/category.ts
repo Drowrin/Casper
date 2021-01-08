@@ -37,6 +37,6 @@ export class ResolvedCategory {
 
         this.name = entity.name;
         this.id = entity.id;
-        this.description = <string>entity.description; // TODO: require description with category in validation
+        this.description = <string>entity.description;
     }
 }
