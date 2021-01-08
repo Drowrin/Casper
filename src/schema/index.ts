@@ -135,6 +135,8 @@ export class Entity {
 
         this.description = data.description;
 
+        // Check all possible components against the entity data.
+        // If a component key matches, the constructed component is added to this Entity.
         for (const comp of components) {
             comp.resolve?.(data, this, m);
         }
