@@ -1,0 +1,68 @@
+import { component } from './component';
+
+export interface ValueData {
+    /**
+     * Platinum pieces
+     * @type integer
+     * @minimum 1
+     */
+    pp?: number;
+
+    /**
+     * Gold pieces
+     * @minimum 1
+     */
+    gp?: number;
+
+    /**
+     * Electrum pieces
+     * @type integer
+     * @minimum 1
+     */
+    ep?: number;
+
+    /**
+     * Silver pieces
+     * @type integer
+     * @minimum 1
+     */
+    sp?: number;
+
+    /**
+     * Copper pieces
+     * @type integer
+     * @minimum 1
+     */
+    cp?: number;
+}
+
+// TODO: variants? ingot types for example?
+export interface ItemData {
+    /**
+     * Value of this item. Optional for priceless items or items of negligible worth.
+     */
+    cost?: ValueData;
+
+    /**
+     * Weight of this item in lb.
+     */
+    weight?: number;
+
+    /**
+     * Default bundle for things like arrows.
+     * Cost/weight of an individual item is <recorded number> / <bundle>
+     * @default 1
+     */
+    bundle: number;
+}
+
+@component('item')
+export class Item {
+    cost?: ValueData;
+    weight?: number;
+
+    constructor(data: ItemData) {
+        this.cost = data.cost;
+        this.weight = data.weight;
+    }
+}

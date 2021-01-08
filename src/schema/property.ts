@@ -1,6 +1,33 @@
-import { Entity } from '.';
-import { Manifest, PropertyData, PropertyRef } from '../schema';
+import { Entity, Manifest } from '.';
 import { component } from './component';
+
+export interface PropertyData {
+    /**
+     * Describes a list of categories this property could apply to.
+     * For example, Range is only valid for the Weapon category.
+     * The rules for this are the same as for the root `categories` list. "category$" is prepended automatically.
+     */
+    categories: string[];
+
+    /**
+     * Names of args that a property requires. For example, Range requires `normal` and `max` args.
+     * Args are replaced in `description` and `display` wherever `<arg>` appears.
+     * For example, Range.display is "Range(<normal>/<max>)"
+     */
+    args: string[];
+
+    /**
+     * Describes the property. This is different from the root description because args are replaced in it.
+     */
+    description: string;
+
+    /**
+     * Optional display string.
+     * If it is undefined, it defaults to the root name. This is useful for unchanging properties like "Heavy".
+     * If it is defined, args are replaced in it before being displayed.
+     */
+    display?: string;
+}
 
 @component('property')
 export class Property {
@@ -28,6 +55,27 @@ export class Property {
             }
         }
     }
+}
+
+export interface PropertyRef {
+    /**
+     * Refers to a proprty by id.
+     * Like categories, "property$" is added automatically.
+     */
+    ref: string;
+
+    /**
+     * Other fields are args used by the property while being resolving.
+     * Not all properties require args.
+     *
+     * Range and Heavy for example:
+     * properties:
+     *   - ref: range
+     *     normal: 30
+     *     max: 60
+     *   - ref: heavy
+     */
+    [key: string]: any;
 }
 
 @component('properties')

@@ -4,8 +4,7 @@ import path = require('path');
 import Fuse from 'fuse.js';
 import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
-import { EntityData } from './schema';
-import { Entity } from './parser';
+import { Entity, EntityData } from './schema';
 import { exit } from 'process';
 
 /**

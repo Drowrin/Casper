@@ -1,6 +1,9 @@
-import { Entity } from '.';
-import { CategoryData, Manifest } from '../schema';
+import { Entity, Manifest } from '.';
 import { component } from './component';
+
+export interface CategoryData {
+    // Empty for now
+}
 
 @component('category')
 export class Category {

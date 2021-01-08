@@ -1,5 +1,11 @@
-import { ImgData } from '../schema';
 import { component } from './component';
+
+export interface ImgData {
+    /**
+     * @TJS-format uri-reference
+     */
+    uri: string;
+}
 
 @component('img')
 export class Img {
