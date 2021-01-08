@@ -4,8 +4,7 @@ import path = require('path');
 import Fuse from 'fuse.js';
 import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
-import { EntityData } from './schema';
-import { Entity } from './parser';
+import { Entity, EntityData } from './schema';
 import { exit } from 'process';
 
 /**
@@ -125,7 +124,7 @@ function resolveEntities(ent: EntityData[]): EntityMap {
     // the Entity constructor does a lot. It recursively resolves and validates each component of this entity.
     var out: { [key: string]: Entity } = {};
     for (var key in d) {
-        out[key] = new Entity(d, d[key]);
+        out[key] = new Entity(d[key], d);
     }
 
     return out;
@@ -140,14 +139,19 @@ export class Casper {
     length: number;
 
     constructor(dataDir: string, schemaDir: string) {
-        // load files and perform initial validation
-        // this array is not saved after it is transformed into a map of resolved Entity objects
-        var ent = loadFiles(dataDir, schemaDir);
+        try {
+            // load files and perform initial validation
+            // this array is not saved after it is transformed into a map of resolved Entity objects
+            var ent = loadFiles(dataDir, schemaDir);
 
-        // count entities and set length property before the array is lost
-        this.length = ent.length;
+            // count entities and set length property before the array is lost
+            this.length = ent.length;
 
-        this.entities = resolveEntities(ent);
+            this.entities = resolveEntities(ent);
+        } catch (e) {
+            console.error(e);
+            exit();
+        }
     }
 
     /**
