@@ -123,6 +123,7 @@ export const components: Component[] = [
     Armor,
     Weapon,
     Vehicle,
+    Spell,
 ];
 
 /**
