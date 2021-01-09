@@ -1,3 +1,4 @@
+import { ActivityData } from './activity';
 import { Armor, ArmorData } from './armor';
 import { Category, CategoryData, ResolvedCategory } from './category';
 import { Component } from './component';
@@ -99,6 +100,11 @@ export interface EntityData {
      * If an entity is a vehicle, it should include this component.
      */
     vehicle?: VehicleData;
+
+    /**
+     * If an entity describes an activity or action a character can take, it should include this component.
+     */
+    activity?: ActivityData;
 
     /**
      * The tool component is applied to non-combat equipment that requires proficiency in order to perform special tasks.
