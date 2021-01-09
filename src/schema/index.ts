@@ -9,6 +9,7 @@ import {
     PropertyRef,
     ResolvedProperty,
 } from './property';
+import { Spell, SpellData } from './spell';
 import { Tool, ToolData } from './tool';
 import { Vehicle, VehicleData } from './vehicle';
 import { Weapon, WeaponData } from './weapon';
@@ -46,6 +47,13 @@ export interface EntityData {
     description?: string;
 
     /**
+     * Source is optional.
+     * The book or other source that this entity was published in.
+     * example: Player's Handbook pg.69
+     */
+    source?: string;
+
+    /**
      * Optional image to be displayed with an entity.
      */
     img?: ImgData;
@@ -81,6 +89,11 @@ export interface EntityData {
      * If an entity is a weapon, it should include this component.
      */
     weapon?: WeaponData;
+
+    /**
+     * If an entity is a spell, it should include this component.
+     */
+    spell?: SpellData;
 
     /**
      * If an entity is a vehicle, it should include this component.
@@ -122,8 +135,11 @@ export class Entity {
     name: string;
     id: string;
 
-    // optional. brief description of this entity.
+    // optional fields
+    // brief description of this entity.
     description?: string;
+    // publilshed source of this entity.
+    source?: string;
 
     // optional components
     // if the raw data contains a matching field, it is resolved into a component
@@ -134,6 +150,7 @@ export class Entity {
         this.id = data.id;
 
         this.description = data.description;
+        this.source = data.source;
 
         // Check all possible components against the entity data.
         // If a component key matches, the constructed component is added to this Entity.
