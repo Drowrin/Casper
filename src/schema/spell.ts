@@ -1,5 +1,36 @@
 import { component, requires } from './component';
 
+export interface DamageData {
+    /**
+     * How much damage it does.
+     * This should be dice or a flat amount.
+     */
+    damage: string | number;
+
+    /**
+     * Damage type it does. For example "Force".
+     */
+    type: string;
+}
+
+export interface SpellComponentData {
+    /**
+     * Whether or not the spell requires a verbal component.
+     */
+    verbal: boolean;
+
+    /**
+     * Whether or not the spell requires a somatic component.
+     */
+    somatic: boolean;
+
+    /**
+     * Whether or not the spell requires a material component.
+     * If true, then the value is a string containing the necessary component.
+     */
+    material: false | string;
+}
+
 export interface SpellData {
     /**
      * The base level that the spell can be cast at.
@@ -28,7 +59,7 @@ export interface SpellData {
     /**
      * The components required to cast the spell.
      */
-    components: ComponentData;
+    components: SpellComponentData;
 
     /**
      * Whether or not the spell has the ritual tag.
@@ -65,20 +96,37 @@ export interface SpellData {
      * Takes an array of DamageData nodes, useful for spells that deal multiple damage types.
      */
     damage?: Array<DamageData>;
-
-    /**
-     * The amount of healing the spell provides, if any.
-     * This should be dice or a flat amount.
-     */
-    healing?: string | number;
 }
 
 @component('spell')
 @requires('item')
 export class Spell {
+    level: number;
+    school: string;
+    castTime: string;
+    range: number | string;
+    components: SpellComponentData;
+    ritual: boolean;
+    concentration: boolean;
+    duration: string;
+    higherLevel?: string;
+    savingThrow?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
+    attack?: 'melee' | 'ranged';
     damage?: Array<DamageData>;
 
     constructor(data: SpellData) {
+        this.level = data.level;
+        this.school = data.school;
+        this.castTime = data.castTime;
+        this.range = data.range;
+        this.components = data.components;
+        this.ritual = data.ritual;
+        this.concentration = data.concentration;
+        this.duration = data.duration;
+        this.damage = data.damage;
+        this.higherLevel = data.higherLevel;
+        this.savingThrow = data.savingThrow;
+        this.attack = data.attack;
         this.damage = data.damage;
     }
 }
