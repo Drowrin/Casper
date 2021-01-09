@@ -9,6 +9,7 @@ import {
     PropertyRef,
     ResolvedProperty,
 } from './property';
+import { Spell, SpellData } from './spell';
 import { Tool, ToolData } from './tool';
 import { Vehicle, VehicleData } from './vehicle';
 import { Weapon, WeaponData } from './weapon';
@@ -88,6 +89,11 @@ export interface EntityData {
      * If an entity is a weapon, it should include this component.
      */
     weapon?: WeaponData;
+
+    /**
+     * If an entity is a spell, it should include this component.
+     */
+    spell?: SpellData;
 
     /**
      * If an entity is a vehicle, it should include this component.
