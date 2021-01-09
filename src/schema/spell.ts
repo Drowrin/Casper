@@ -31,6 +31,36 @@ export interface SpellComponentData {
     material: false | string;
 }
 
+export interface UpcastData {
+    /**
+     * The written rules for the higher level casting.
+     */
+    description: string;
+
+    /**
+     * Extra damage or effects for spells at each spell level
+     */
+    levels?: {
+        2?: DamageData | string;
+        3?: DamageData | string;
+        4?: DamageData | string;
+        5?: DamageData | string;
+        6?: DamageData | string;
+        7?: DamageData | string;
+        8?: DamageData | string;
+        9?: DamageData | string;
+    };
+
+    /**
+     * Extra damage or effects for cantrips at each class level
+     */
+    cantrips?: {
+        5?: DamageData | string;
+        11?: DamageData | string;
+        17?: DamageData | string;
+    };
+}
+
 export interface SpellData {
     /**
      * The base level that the spell can be cast at.
@@ -85,7 +115,7 @@ export interface SpellData {
     /**
      * The extra effects of the spell when cast at a higher level, if any.
      */
-    higherLevel?: string;
+    upcast?: UpcastData;
 
     /**
      * The ability of the saving throw required by the spell, if any.
@@ -116,7 +146,7 @@ export class Spell {
     ritual: boolean;
     concentration: boolean;
     duration: string;
-    higherLevel?: string;
+    upcast?: UpcastData;
     savingThrow?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
     attack?: 'melee' | 'ranged';
     damage?: Array<DamageData>;
@@ -132,7 +162,7 @@ export class Spell {
         this.concentration = data.concentration;
         this.duration = data.duration;
         this.damage = data.damage;
-        this.higherLevel = data.higherLevel;
+        this.upcast = data.upcast;
         this.savingThrow = data.savingThrow;
         this.attack = data.attack;
         this.damage = data.damage;
