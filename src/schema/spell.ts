@@ -35,7 +35,7 @@ export interface SpellData {
     /**
      * The base level that the spell can be cast at.
      * @type integer
-     * @minimum 1
+     * @minimum 0
      * @maximum 9
      */
     level: number;
