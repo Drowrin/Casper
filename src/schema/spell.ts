@@ -38,26 +38,81 @@ export interface UpcastData {
     description: string;
 
     /**
-     * Extra damage or effects for spells at each spell level
+     * Extra count, damage, or other effects for spells at each spell level
      */
     levels?: {
-        2?: DamageData | string;
-        3?: DamageData | string;
-        4?: DamageData | string;
-        5?: DamageData | string;
-        6?: DamageData | string;
-        7?: DamageData | string;
-        8?: DamageData | string;
-        9?: DamageData | string;
+        2?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        3?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        4?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        5?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        6?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        7?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        8?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        9?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
     };
 
     /**
-     * Extra damage or effects for cantrips at each class level
+     * Extra count, damage, or other effects for cantrips at each class level
      */
     cantrips?: {
-        5?: DamageData | string;
-        11?: DamageData | string;
-        17?: DamageData | string;
+        5?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        11?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        17?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
     };
 }
 
@@ -132,6 +187,18 @@ export interface SpellData {
      * Takes an array of DamageData nodes, useful for spells that deal multiple damage types.
      */
     damage?: Array<DamageData>;
+
+    /**
+     * The number of attack rolls or spell effects.
+     * @default 1
+     */
+    count: number;
+
+    /**
+     * Whether or not the spell should give the user the option to reroll the spell.
+     * @default false
+     */
+    reroll: boolean;
 }
 
 @component('spell')
@@ -150,6 +217,8 @@ export class Spell {
     savingThrow?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
     attack?: 'melee' | 'ranged';
     damage?: Array<DamageData>;
+    count: number;
+    reroll: boolean;
 
     constructor(data: SpellData) {
         this.level = data.level;
@@ -166,5 +235,7 @@ export class Spell {
         this.savingThrow = data.savingThrow;
         this.attack = data.attack;
         this.damage = data.damage;
+        this.count = data.count;
+        this.reroll = data.reroll;
     }
 }
