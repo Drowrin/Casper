@@ -57,6 +57,12 @@ export interface SpellData {
     range: number | string;
 
     /**
+     * The area of effect of the spell.
+     * example: 30ft cube
+     */
+    aoe?: string;
+
+    /**
      * The components required to cast the spell.
      */
     components: SpellComponentData;
@@ -105,6 +111,7 @@ export class Spell {
     school: string;
     castTime: string;
     range: number | string;
+    aoe?: string;
     components: SpellComponentData;
     ritual: boolean;
     concentration: boolean;
@@ -119,6 +126,7 @@ export class Spell {
         this.school = data.school;
         this.castTime = data.castTime;
         this.range = data.range;
+        this.aoe = data.aoe;
         this.components = data.components;
         this.ritual = data.ritual;
         this.concentration = data.concentration;
