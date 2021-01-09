@@ -60,7 +60,7 @@ export interface SpellData {
      * The area of effect of the spell.
      * example: 30ft cube
      */
-    aoe: string;
+    aoe?: string;
 
     /**
      * The components required to cast the spell.
