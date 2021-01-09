@@ -111,7 +111,7 @@ export class Spell {
     school: string;
     castTime: string;
     range: number | string;
-    aoe: string;
+    aoe?: string;
     components: SpellComponentData;
     ritual: boolean;
     concentration: boolean;
