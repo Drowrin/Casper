@@ -10,7 +10,7 @@ export interface ActivityData {
 }
 
 @component('activity')
-@requires('desctiption')
+@requires('description')
 export class Activity {
     time: string;
 
@@ -22,7 +22,6 @@ export class Activity {
 export interface ActivityRef {
     /**
      * Refers to an activity by id.
-     * "activity$" is added automatically.
      */
     ref: string;
 }
@@ -32,6 +31,7 @@ export class ResolvedActivity {
     name: string;
     id: string;
     description: string;
+    time: string;
 
     constructor(data: ActivityRef, parent: Entity, m: Manifest) {
         const ref = `activity$${data.ref}`;
@@ -48,5 +48,6 @@ export class ResolvedActivity {
         this.name = entity.name;
         this.id = entity.id;
         this.description = <string>entity.description;
+        this.time = activity.time;
     }
 }

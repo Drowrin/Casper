@@ -1,9 +1,15 @@
-import { ActivityData } from './activity';
+import {
+    Activity,
+    ActivityData,
+    ActivityRef,
+    ResolvedActivity,
+} from './activity';
 import { Armor, ArmorData } from './armor';
 import { Category, CategoryData, ResolvedCategory } from './category';
 import { Component } from './component';
 import { Img, ImgData } from './img';
 import { Item, ItemData } from './item';
+import { Proficiency, ProficiencyData } from './proficiency';
 import {
     Property,
     PropertyData,
@@ -107,6 +113,16 @@ export interface EntityData {
     activity?: ActivityData;
 
     /**
+     * A list of activities related to this entity.
+     */
+    activities?: ActivityRef[];
+
+    /**
+     * If an entity represents something that a character can be proficient in, it should have this component.
+     */
+    proficiency?: ProficiencyData;
+
+    /**
      * The tool component is applied to non-combat equipment that requires proficiency in order to perform special tasks.
      * For example: tools, vehicles, and instruments.
      */
@@ -129,6 +145,9 @@ export const components: Component[] = [
     Armor,
     Weapon,
     Vehicle,
+    Proficiency,
+    Activity,
+    ResolvedActivity,
 ];
 
 /**
