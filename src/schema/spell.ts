@@ -99,7 +99,7 @@ export interface SpellData {
 }
 
 @component('spell')
-@requires('item')
+@requires('description')
 export class Spell {
     level: number;
     school: string;
