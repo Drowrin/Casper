@@ -24,7 +24,7 @@ export interface EntityData {
      * Convention is namespaced ids, separated by $. For example, "tool$smithing" or "tool$instrument$drum".
      * These namespaces are categories.
      * A category should be an existing entity with an id like "tool$*" or "tool$instrument$*"
-     * @TJS-pattern ^\w+(\$\w+)+$
+     * @TJS-pattern ^\w+(\$(\w+|\*))*$
      */
     id: string;
 
@@ -138,13 +138,6 @@ function getEntityCategories(data: EntityData, m: Manifest) {
 
         out.push(cat);
     });
-
-    if (data.id.endsWith('*')) {
-        out.push(cats['category$']);
-    }
-
-    // TODO:
-    // if (out.length == 0) throw `${data.id} is not in any categories!`;
 
     return <CategoryData[]>out;
 }
