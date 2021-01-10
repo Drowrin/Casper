@@ -13,7 +13,7 @@ import { exit } from 'process';
  * Each file is validated and references are replaced.
  * Returns a map of ids to entities
  */
-function loadFiles(mainDataDir: string): EntityData[] {
+function loadFiles(...mainDataDirs: string[]): EntityData[] {
     const schema = JSON.parse(
         <string>(<any>fs.readFileSync('./build/validator.json'))
     );
@@ -53,7 +53,10 @@ function loadFiles(mainDataDir: string): EntityData[] {
     }
 
     // get a collection of all the yml files in the data directory
-    const allFiles = loadFilesInner(mainDataDir);
+    let allFiles: string[] = [];
+    for (const dataDir of mainDataDirs) {
+        allFiles = allFiles.concat(loadFilesInner(dataDir));
+    }
 
     console.log(`Files loaded: ${allFiles}`);
 
@@ -168,11 +171,11 @@ export class Casper {
     index: Fuse.FuseIndex<Entity>;
     hash: string;
 
-    constructor(dataDir: string) {
+    constructor(...dataDirs: string[]) {
         try {
             // load files and perform initial validation
             // this array is not saved after it is transformed into a map of resolved Entity objects
-            var ent = loadFiles(dataDir);
+            var ent = loadFiles(...dataDirs);
 
             // count entities and set length property before the array is lost
             this.length = ent.length;
@@ -220,7 +223,7 @@ export class Casper {
 if (require.main === module) {
     var arg = process.argv.slice(2).join('$');
 
-    var casper = new Casper('./data/tools.yml');
+    var casper = new Casper('./data');
 
     console.log(JSON.stringify(casper.get(arg), null, 2));
 }
