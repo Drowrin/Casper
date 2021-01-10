@@ -12,11 +12,8 @@ export interface AbilityCheck {
 
     /**
      * The DC of the check.
-     * @type integer
-     * @minimum 1
-     * @maximum 30
      */
-    dc: number;
+    dc: number | 'Varies';
 
     /**
      * Description of the task that prompted the check and/or the results.
