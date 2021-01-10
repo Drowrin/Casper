@@ -3,13 +3,6 @@ import { component, requires } from './component';
 
 export interface PropertyData {
     /**
-     * Describes a list of categories this property could apply to.
-     * For example, Range is only valid for the Weapon category.
-     * The rules for this are the same as for the root `categories` list. "category$" is prepended automatically.
-     */
-    categories: string[];
-
-    /**
      * Names of args that a property requires. For example, Range requires `normal` and `max` args.
      * Args are replaced in `description` and `display` wherever `<arg>` appears.
      * For example, Range.display is "Range(<normal>/<max>)"
@@ -31,14 +24,12 @@ export interface PropertyData {
 
 @component('property')
 export class Property {
-    categories: string[];
     args: string[];
     description: string;
     display?: string;
     entities: string[];
 
     constructor(data: PropertyData, parent: Entity, m: Manifest) {
-        this.categories = data.categories;
         this.args = data.args;
         this.description = data.description;
         this.display = data.display;
@@ -99,15 +90,6 @@ export class ResolvedProperty {
 
         if (property === undefined)
             throw `${parent.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`;
-
-        // check that the parent entity belongs to at least one of the categories this property requires.
-        const categories = property.categories;
-        function checkCategories(c: string) {
-            return m[parent.id].categories.includes(c);
-        }
-        if (categories.length > 0 && !categories.some(checkCategories)) {
-            throw `${parent.id} does not match any possible categories for ${ref} [${property.categories}]!`;
-        }
 
         // process display and description with arg values. replace <argname> with the arg values.
         var description = property.description;
