@@ -1,3 +1,4 @@
+import e from 'express';
 import { Armor, ArmorData } from './armor';
 import { Component } from './component';
 import { Img, ImgData } from './img';
@@ -145,10 +146,13 @@ function getEntityCategories(data: EntityData, m: Manifest) {
 function resolveCategory(ed: EntityData, entity: Entity, m: Manifest) {
     if (ed.id.endsWith('*')) {
         entity.entities = [];
-        const cat = ed.id.slice(0, -1);
 
         for (const [k, v] of Object.entries(m)) {
-            if (cat in getEntityCategories(v, m).map((e) => e.id)) {
+            if (
+                getEntityCategories(v, m)
+                    .map((e) => e.id)
+                    .includes(ed.id)
+            ) {
                 entity.entities.push(k);
             }
         }
