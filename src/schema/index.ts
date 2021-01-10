@@ -1,5 +1,4 @@
 import { Armor, ArmorData } from './armor';
-import { Category, CategoryData, ResolvedCategory } from './category';
 import { Component } from './component';
 import { Img, ImgData } from './img';
 import { Item, ItemData } from './item';
@@ -22,23 +21,22 @@ export interface EntityData {
 
     /**
      * Every entity needs an id. This needs to be unique.
-     * Convention is namespaced ids, separated by $. For example, "tool$smithing".
+     * Convention is namespaced ids, separated by $. For example, "tool$smithing" or "tool$instrument$drum".
+     * These namespaces are categories.
+     * A category should be an existing entity with an id like "tool$*" or "tool$instrument$*"
      * @TJS-pattern ^\w+(\$\w+)+$
      */
     id: string;
 
     /**
-     * Every entity should have at least one category, such as "weapon".
-     * Categories are also defined by entities, with the id convention "category$<category-name>"".
-     * Strings in this list should refer to categories by id. The "category$" prefix is automatically added.
+     * Some entities belong to multiple categories.
+     * Additional categories that do not fit in the id can be added here.
      * Example:
-     * category:
-     *   - martial
-     *   - ranged
-     *
-     * @minItems 1
+     * categories:
+     *   - weapon$martial
+     *   - weapon$ranged
      */
-    categories: string[];
+    categories?: string[];
 
     /**
      * Description is optional.
@@ -57,11 +55,6 @@ export interface EntityData {
      * Optional image to be displayed with an entity.
      */
     img?: ImgData;
-
-    /**
-     * If this entity defines a category, this should be `true`. Otherwise ignore.
-     */
-    category?: CategoryData;
 
     /**
      * A property defines special rules for using equipment.
@@ -107,6 +100,68 @@ export interface EntityData {
     tool?: ToolData;
 }
 
+export interface CategoryData {
+    name: string;
+    id: string;
+    description: string;
+}
+
+function getAllCategories(m: Manifest): Manifest {
+    return Object.entries(m)
+        .filter(([k, _]) => k.endsWith('*'))
+        .reduce((o, [k, v]) => {
+            if (v.description === undefined)
+                throw `${v.id} does not contain "description", which is a requirement to be a category`;
+            return {
+                ...o,
+                [k.slice(0, -1)]: v,
+            };
+        }, {});
+}
+
+function getEntityCategories(data: EntityData, m: Manifest) {
+    const cats = getAllCategories(m);
+
+    let out = [];
+
+    for (const [k, v] of Object.entries(cats)) {
+        if (data.id.startsWith(k)) {
+            out.push(v);
+        }
+    }
+
+    data.categories?.forEach((e) => {
+        const cat = cats[`${e}$`];
+
+        if (cat === undefined)
+            throw `${data.id} contains an undefined reference: "${e}"`;
+
+        out.push(cat);
+    });
+
+    if (data.id.endsWith('*')) {
+        out.push(cats['category$']);
+    }
+
+    // TODO:
+    // if (out.length == 0) throw `${data.id} is not in any categories!`;
+
+    return <CategoryData[]>out;
+}
+
+function resolveCategory(ed: EntityData, entity: Entity, m: Manifest) {
+    if (ed.id.endsWith('*')) {
+        entity.entities = [];
+        const cat = ed.id.slice(0, -1);
+
+        for (const [k, v] of Object.entries(m)) {
+            if (cat in getEntityCategories(v, m).map((e) => e.id)) {
+                entity.entities.push(k);
+            }
+        }
+    }
+}
+
 export type Manifest = { [key: string]: EntityData };
 
 /**
@@ -118,8 +173,6 @@ export const components: Component[] = [
     Tool,
     ResolvedProperty,
     Property,
-    ResolvedCategory,
-    Category,
     Armor,
     Weapon,
     Vehicle,
@@ -136,6 +189,8 @@ export class Entity {
     name: string;
     id: string;
 
+    categories: CategoryData[];
+
     // optional fields
     // brief description of this entity.
     description?: string;
@@ -149,6 +204,9 @@ export class Entity {
     constructor(data: EntityData, m: Manifest) {
         this.name = data.name;
         this.id = data.id;
+
+        this.categories = getEntityCategories(data, m);
+        resolveCategory(data, this, m);
 
         this.description = data.description;
         this.source = data.source;
