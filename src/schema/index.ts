@@ -13,6 +13,7 @@ import { Spell, SpellData } from './spell';
 import { Tool, ToolData } from './tool';
 import { Vehicle, VehicleData } from './vehicle';
 import { Weapon, WeaponData } from './weapon';
+import { Creature, CreatureData} from './creature';
 
 export interface EntityData {
     /**
@@ -105,6 +106,11 @@ export interface EntityData {
      * For example: tools, vehicles, and instruments.
      */
     tool?: ToolData;
+
+    /**
+     * If an entity is a creature, it should include this component.
+     */
+    creature?: CreatureData;
 }
 
 export type Manifest = { [key: string]: EntityData };
@@ -124,6 +130,7 @@ export const components: Component[] = [
     Weapon,
     Vehicle,
     Spell,
+    Creature,
 ];
 
 /**
