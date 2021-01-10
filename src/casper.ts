@@ -55,6 +55,8 @@ function loadFiles(mainDataDir: string): EntityData[] {
     // get a collection of all the yml files in the data directory
     const allFiles = loadFilesInner(mainDataDir);
 
+    console.log(`Files loaded: ${allFiles}`);
+
     // load all the files into one big array of all raw entities
     var out: EntityData[] = [];
     var errors: { [key: string]: any[] } = {};
@@ -77,13 +79,7 @@ function loadFiles(mainDataDir: string): EntityData[] {
             if (!valid)
                 errors[entity.id] =
                     ajv.errors?.map((err) => {
-                        const {
-                            keyword,
-                            dataPath,
-                            message,
-                            parentSchema,
-                            data,
-                        } = err;
+                        const { keyword, dataPath, message } = err;
 
                         if (
                             keyword === 'additionalProperties' &&
@@ -95,8 +91,6 @@ function loadFiles(mainDataDir: string): EntityData[] {
                             keyword,
                             dataPath,
                             message,
-                            parentSchema,
-                            data,
                         };
                     }) ?? [];
         }
@@ -226,7 +220,7 @@ export class Casper {
 if (require.main === module) {
     var arg = process.argv.slice(2).join('$');
 
-    var casper = new Casper('./data');
+    var casper = new Casper('./data/tools.yml');
 
     console.log(JSON.stringify(casper.get(arg), null, 2));
 }
