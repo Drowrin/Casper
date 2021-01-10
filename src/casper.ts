@@ -27,25 +27,29 @@ function loadFiles(mainDataDir: string): EntityData[] {
      * Recurse through directories and gather paths to all yaml files.
      */
     function loadFilesInner(dataDir: string): string[] {
-        var out: string[] = [];
+        // read various stats about the file. Used here to determine if a path points to a directory or a file.
+        var stats = fs.lstatSync(dataDir);
 
-        // iterate through each file in the current directory
-        for (const file of fs.readdirSync(dataDir)) {
-            // the full path to this particular file
-            var pathString = path.join(dataDir, file);
-            // read various stats about the file. Used here to determine if a path points to a directory or a file.
-            var stats = fs.lstatSync(pathString);
+        if (stats.isFile() && dataDir.endsWith('.yml')) {
+            // if the path points to a yaml file, add it to the output
+            return [dataDir];
+        } else if (stats.isDirectory()) {
+            var out: string[] = [];
 
-            if (stats.isFile() && file.endsWith('.yml')) {
-                // if the path points to a yaml file, add it to the output
-                out.push(pathString);
-            } else if (stats.isDirectory() && !file.startsWith('.')) {
-                // if the path points to a non-hidden directory, recurse into it and add all it's files to the output
-                out = out.concat(loadFilesInner(dataDir));
+            // iterate through each file in the current directory
+            for (const file of fs.readdirSync(dataDir)) {
+                if (!file.startsWith('.')) {
+                    // the full path to this particular file
+                    var pathString = path.join(dataDir, file);
+                    out = out.concat(loadFilesInner(pathString));
+                }
             }
+
+            return out;
         }
 
-        return out;
+        // file didn't match anything we care about, ignore.
+        return [];
     }
 
     // get a collection of all the yml files in the data directory
