@@ -168,11 +168,6 @@ export interface SpellData {
     duration: string;
 
     /**
-     * The extra effects of the spell when cast at a higher level, if any.
-     */
-    upcast?: UpcastData;
-
-    /**
      * The ability of the saving throw required by the spell, if any.
      */
     savingThrow?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
@@ -187,6 +182,11 @@ export interface SpellData {
      * Takes an array of DamageData nodes, useful for spells that deal multiple damage types.
      */
     damage?: Array<DamageData>;
+
+    /**
+     * The extra effects of the spell when cast at a higher level, if any.
+     */
+    upcast?: UpcastData;
 
     /**
      * The number of attack rolls or spell effects.
@@ -213,10 +213,10 @@ export class Spell {
     ritual: boolean;
     concentration: boolean;
     duration: string;
-    upcast?: UpcastData;
     savingThrow?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
     attack?: 'melee' | 'ranged';
     damage?: Array<DamageData>;
+    upcast?: UpcastData;
     count: number;
     reroll: boolean;
 
@@ -231,10 +231,10 @@ export class Spell {
         this.concentration = data.concentration;
         this.duration = data.duration;
         this.damage = data.damage;
-        this.upcast = data.upcast;
         this.savingThrow = data.savingThrow;
         this.attack = data.attack;
         this.damage = data.damage;
+        this.upcast = data.upcast;
         this.count = data.count;
         this.reroll = data.reroll;
     }
