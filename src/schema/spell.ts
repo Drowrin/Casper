@@ -31,6 +31,91 @@ export interface SpellComponentData {
     material: false | string;
 }
 
+export interface UpcastData {
+    /**
+     * The written rules for the higher level casting.
+     */
+    description: string;
+
+    /**
+     * Extra count, damage, or other effects for spells at each spell level
+     */
+    levels?: {
+        2?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        3?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        4?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        5?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        6?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        7?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        8?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        9?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+    };
+
+    /**
+     * Extra count, damage, or other effects for cantrips at each class level
+     */
+    cantrips?: {
+        5?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        11?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+        17?:
+            | DamageData
+            | string
+            | {
+                  count: number;
+              };
+    };
+}
+
 export interface SpellData {
     /**
      * The base level that the spell can be cast at.
@@ -83,11 +168,6 @@ export interface SpellData {
     duration: string;
 
     /**
-     * The extra effects of the spell when cast at a higher level, if any.
-     */
-    higherLevel?: string;
-
-    /**
      * The ability of the saving throw required by the spell, if any.
      */
     savingThrow?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
@@ -102,6 +182,23 @@ export interface SpellData {
      * Takes an array of DamageData nodes, useful for spells that deal multiple damage types.
      */
     damage?: Array<DamageData>;
+
+    /**
+     * The extra effects of the spell when cast at a higher level, if any.
+     */
+    upcast?: UpcastData;
+
+    /**
+     * The number of attack rolls or spell effects.
+     * @default 1
+     */
+    count: number;
+
+    /**
+     * Whether or not the spell should give the user the option to reroll the spell.
+     * @default false
+     */
+    reroll: boolean;
 }
 
 @component('spell')
@@ -116,10 +213,12 @@ export class Spell {
     ritual: boolean;
     concentration: boolean;
     duration: string;
-    higherLevel?: string;
     savingThrow?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
     attack?: 'melee' | 'ranged';
     damage?: Array<DamageData>;
+    upcast?: UpcastData;
+    count: number;
+    reroll: boolean;
 
     constructor(data: SpellData) {
         this.level = data.level;
@@ -132,9 +231,11 @@ export class Spell {
         this.concentration = data.concentration;
         this.duration = data.duration;
         this.damage = data.damage;
-        this.higherLevel = data.higherLevel;
         this.savingThrow = data.savingThrow;
         this.attack = data.attack;
         this.damage = data.damage;
+        this.upcast = data.upcast;
+        this.count = data.count;
+        this.reroll = data.reroll;
     }
 }
