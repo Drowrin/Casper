@@ -7,18 +7,30 @@ The project is currently in very early development. Overall structure is likely 
 ## Development
 
 To install dependencies
+
 `npm install`
 
 To build
+
 `npm run build`
 
 To run a previous build without rebuilding
+
 `npm start`
 
 To build and then run the dev build
+
 `npm run dev`
 
 Data may be viewed at `localhost:3001`. In the future, this will be configurable for dev builds. [balthasar](https://github.com/Drowrin/balthasar) provides a frontend for the data.
+
+## Command Line Interface
+
+casper includes a command line interface for quickly interacting with data when loading the whole server is not necessary.
+
+`npm run casper <args>`
+
+Multiple args are joined together to form an entity id, which is looked up in the manifest. If the entity exists, the resolved data will be printed to the console.
 
 ## Powered By...
 
