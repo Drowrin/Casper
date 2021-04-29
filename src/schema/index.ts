@@ -5,6 +5,7 @@ import {
     ResolvedActivity,
 } from './activity';
 import { Armor, ArmorData } from './armor';
+import { Article, ArticleData } from './article';
 import { Component } from './component';
 import { Description, DescriptionData } from './description';
 import { Img, ImgData } from './img';
@@ -52,6 +53,12 @@ export interface EntityData {
      * Should give a brief overview of an entity, just a few sentences.
      */
     description?: DescriptionData;
+
+    /**
+     * Article is for longer text than description--text that is the primary content of the entity.
+     * Description is required, as article is too long to be shown in search results.
+     */
+    article?: ArticleData;
 
     /**
      * Source is optional.
@@ -189,6 +196,7 @@ export type Manifest = { [key: string]: EntityData };
  */
 export const components: Component[] = [
     Description,
+    Article,
     Source,
     Img,
     Item,
