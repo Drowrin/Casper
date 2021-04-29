@@ -148,10 +148,6 @@ const fuseKeys = [
         weight: 1.5,
     },
     {
-        name: 'description',
-        weight: 0.2,
-    },
-    {
         name: 'components.categories.name',
         weight: 1,
     },

@@ -6,6 +6,7 @@ import {
 } from './activity';
 import { Armor, ArmorData } from './armor';
 import { Component } from './component';
+import { Description, DescriptionData } from './description';
 import { Img, ImgData } from './img';
 import { Item, ItemData } from './item';
 import { Proficiency, ProficiencyData } from './proficiency';
@@ -15,6 +16,7 @@ import {
     PropertyRef,
     ResolvedProperty,
 } from './property';
+import { Source, SourceData } from './source';
 import { Spell, SpellData } from './spell';
 import { Tool, ToolData } from './tool';
 import { Vehicle, VehicleData } from './vehicle';
@@ -49,14 +51,14 @@ export interface EntityData {
      * Description is optional.
      * Should give a brief overview of an entity, just a few sentences.
      */
-    description?: string;
+    description?: DescriptionData;
 
     /**
      * Source is optional.
      * The book or other source that this entity was published in.
      * example: Player's Handbook pg.69
      */
-    source?: string;
+    source?: SourceData;
 
     /**
      * Optional image to be displayed with an entity.
@@ -186,6 +188,8 @@ export type Manifest = { [key: string]: EntityData };
  * Collection of components that will attempt to resolve in each entity
  */
 export const components: Component[] = [
+    Description,
+    Source,
     Img,
     Item,
     Tool,
@@ -211,12 +215,6 @@ export class Entity {
     id: string;
 
     categories: CategoryData[];
-
-    // optional fields
-    // brief description of this entity.
-    description?: string;
-    // publilshed source of this entity.
-    source?: string;
 
     // optional components
     // if the raw data contains a matching field, it is resolved into a component
