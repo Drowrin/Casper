@@ -1,3 +1,4 @@
+import { Converter } from 'showdown';
 import {
     Activity,
     ActivityData,
@@ -228,20 +229,17 @@ export class Entity {
     // if the raw data contains a matching field, it is resolved into a component
     [key: string]: any;
 
-    constructor(data: EntityData, m: Manifest) {
+    constructor(data: EntityData, m: Manifest, c: Converter) {
         this.name = data.name;
         this.id = data.id;
 
         this.categories = getEntityCategories(data, m);
         resolveCategory(data, this, m);
 
-        this.description = data.description;
-        this.source = data.source;
-
         // Check all possible components against the entity data.
         // If a component key matches, the constructed component is added to this Entity.
         for (const comp of components) {
-            comp.resolve?.(data, this, m);
+            comp.resolve?.(data, this, m, c);
         }
     }
 }

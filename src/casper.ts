@@ -7,6 +7,8 @@ import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 import { Entity, EntityData } from './schema';
 import { exit } from 'process';
+import showdown = require('showdown');
+import { casperMarkdown } from './markdown';
 
 /**
  * Load all YAML files in a directory recursively.
@@ -124,11 +126,25 @@ function resolveEntities(ent: EntityData[]): EntityMap {
         d[e.id] = e;
     }
 
+    let converter = new showdown.Converter({
+        extensions: [casperMarkdown(d)],
+
+        ghCompatibleHeaderId: true,
+        simplifiedAutoLink: true,
+        excludeTrailingPunctuationFromURLs: true,
+        literalMidWordUnderscores: true,
+        strikethrough: true,
+        tables: true,
+        tablesHeaderId: true,
+        tasklists: true,
+        disableForced4SpacesIndentedSublists: true,
+    });
+
     // resolve raw entity data into full Entity objects.
     // the Entity constructor does a lot. It recursively resolves and validates each component of this entity.
     var out: { [key: string]: Entity } = {};
     for (var key in d) {
-        out[key] = new Entity(d[key], d);
+        out[key] = new Entity(d[key], d, converter);
     }
 
     return out;

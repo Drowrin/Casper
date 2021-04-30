@@ -1,3 +1,4 @@
+import { Converter } from 'showdown';
 import { Entity } from '.';
 import { Manifest } from '../schema';
 
@@ -7,7 +8,7 @@ import { Manifest } from '../schema';
  */
 export interface Component {
     new (...args: any[]): {};
-    resolve?(ed: any, entity: Entity, m: Manifest): void;
+    resolve?(ed: any, entity: Entity, m: Manifest, c: Converter): void;
     required?: string[];
 }
 
@@ -33,7 +34,7 @@ export function component(key: string) {
              * Adds constructed Component to Entity if the Component's key is present in the EntityData
              * Manifest is used in some contructors so that entities can reference each other.
              */
-            static resolve(ed: any, entity: Entity, m: Manifest) {
+            static resolve(ed: any, entity: Entity, m: Manifest, c: Converter) {
                 const data = ed[key];
 
                 if (data !== undefined) {
@@ -47,10 +48,10 @@ export function component(key: string) {
                     // used for stuff like `categories` and `properties`.
                     if (Array.isArray(data)) {
                         entity[key] = data.map(
-                            (d: any) => new this(d, entity, m)
+                            (d: any) => new this(d, entity, m, c)
                         );
                     } else {
-                        entity[key] = new this(data, entity, m);
+                        entity[key] = new this(data, entity, m, c);
                     }
                 }
             }
