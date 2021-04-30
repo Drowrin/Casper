@@ -34,7 +34,7 @@ export class ResolvedActivity {
     time: string;
 
     constructor(data: ActivityRef, parent: Entity, m: Manifest) {
-        const ref = `activity$${data.ref}`;
+        const ref = `activity.${data.ref}`;
         const entity = m[ref];
 
         if (entity === undefined)

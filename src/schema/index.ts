@@ -32,10 +32,11 @@ export interface EntityData {
 
     /**
      * Every entity needs an id. This needs to be unique.
-     * Convention is namespaced ids, separated by $. For example, "tool$smithing" or "tool$instrument$drum".
+     * Convention is namespaced ids, separated by .
+     * For example, "tool.smithing" or "tool.instrument.drum".
      * These namespaces are categories.
-     * A category should be an existing entity with an id like "tool$*" or "tool$instrument$*"
-     * @TJS-pattern ^\w+(\$(\w+|\*))*$
+     * A category should be an existing entity with an id like "tool.*" or "tool.instrument.*"
+     * @TJS-pattern ^\w+(.(\w+|\*))*$
      */
     id: string;
 
@@ -44,8 +45,8 @@ export interface EntityData {
      * Additional categories that do not fit in the id can be added here.
      * Example:
      * categories:
-     *   - weapon$martial
-     *   - weapon$ranged
+     *   - weapon.martial
+     *   - weapon.ranged
      */
     categories?: string[];
 
@@ -163,7 +164,7 @@ function getEntityCategories(data: EntityData, m: Manifest) {
     }
 
     data.categories?.forEach((e) => {
-        const cat = cats[`${e}$`];
+        const cat = cats[`${e}.`];
 
         if (cat === undefined)
             throw `${data.id} contains an undefined reference: "${e}"`;

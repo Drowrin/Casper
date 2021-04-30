@@ -233,7 +233,7 @@ export class Casper {
 // used for debugging data changes
 // example: `npm run casper weapon longsword`
 if (require.main === module) {
-    var arg = process.argv.slice(2).join('$');
+    var arg = process.argv.slice(2).join('.');
 
     var casper = new Casper('./data');
 

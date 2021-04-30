@@ -35,7 +35,7 @@ export class Property {
         this.display = data.display;
 
         // collect a list of ids of all entities that contain this property
-        const name = parent.id.split('$')[1];
+        const name = parent.id.split('.')[1];
         this.entities = [];
         function hasProp(prop: PropertyRef) {
             return prop.ref === name;
@@ -80,7 +80,7 @@ export class ResolvedProperty {
 
     constructor(data: PropertyRef, parent: Entity, m: Manifest) {
         // expand ref into full id and get the property entity.
-        const ref = `property$${data.ref}`;
+        const ref = `property.${data.ref}`;
         const entity = m[ref];
 
         if (entity === undefined)
