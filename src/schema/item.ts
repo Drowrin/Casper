@@ -1,67 +1,63 @@
-import { component } from './component';
+import { Component } from './component';
 
-export interface ValueData {
-    /**
-     * Platinum pieces
-     * @type integer
-     * @minimum 1
-     */
-    pp?: number;
+export namespace Value {
+    export interface Data {
+        /**
+         * Platinum pieces
+         * @type integer
+         * @minimum 1
+         */
+        pp?: number;
 
-    /**
-     * Gold pieces
-     * @minimum 1
-     */
-    gp?: number;
+        /**
+         * Gold pieces
+         * @minimum 1
+         */
+        gp?: number;
 
-    /**
-     * Electrum pieces
-     * @type integer
-     * @minimum 1
-     */
-    ep?: number;
+        /**
+         * Electrum pieces
+         * @type integer
+         * @minimum 1
+         */
+        ep?: number;
 
-    /**
-     * Silver pieces
-     * @type integer
-     * @minimum 1
-     */
-    sp?: number;
+        /**
+         * Silver pieces
+         * @type integer
+         * @minimum 1
+         */
+        sp?: number;
 
-    /**
-     * Copper pieces
-     * @type integer
-     * @minimum 1
-     */
-    cp?: number;
+        /**
+         * Copper pieces
+         * @type integer
+         * @minimum 1
+         */
+        cp?: number;
+    }
 }
 
-export interface ItemData {
-    /**
-     * Value of this item. Optional for priceless items or items of negligible worth.
-     */
-    cost?: ValueData;
+Component.register(Item);
+export namespace Item {
+    export const KEY = 'item';
 
-    /**
-     * Weight of this item in lb.
-     */
-    weight?: number;
+    export interface Data {
+        /**
+         * Value of this item. Optional for priceless items or items of negligible worth.
+         */
+        cost?: Value.Data;
 
-    /**
-     * Default bundle for things like arrows.
-     * Cost/weight of an individual item is <recorded number> / <bundle>
-     * @default 1
-     */
-    bundle: number;
-}
+        /**
+         * Weight of this item in lb.
+         */
+        weight?: number;
 
-@component('item')
-export class Item {
-    cost?: ValueData;
-    weight?: number;
-
-    constructor(data: ItemData) {
-        this.cost = data.cost;
-        this.weight = data.weight;
+        /**
+         * Default bundle for things like arrows.
+         * Cost/weight of an individual item is <recorded number> / <bundle>
+         * @default 1
+         */
+        bundle: number;
     }
 }

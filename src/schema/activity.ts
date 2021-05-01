@@ -1,57 +1,50 @@
-import { Converter } from 'showdown';
-import { Entity, Manifest } from '.';
-import { component, requires } from './component';
+import { Component } from './component';
 
-export interface ActivityData {
-    /**
-     * Time taken to perform this activity.
-     * If it is not an action type, it should be a span of time taken to perform the activity.
-     */
-    time: string;
-}
+Component.register(Activity);
+export namespace Activity {
+    export const KEY = 'activity';
+    export const REQUIRES = ['description'];
 
-@component('activity')
-@requires('description')
-export class Activity {
-    time: string;
-
-    constructor(data: ActivityData) {
-        this.time = data.time;
+    export interface Data {
+        /**
+         * Time taken to perform this activity.
+         * If it is not an action type, it should be a span of time taken to perform the activity.
+         */
+        time: string;
     }
 }
 
-export interface ActivityRef {
-    /**
-     * Refers to an activity by id.
-     */
-    ref: string;
-}
+Component.register(Activities);
+export namespace Activities {
+    export const KEY = 'activities';
 
-@component('activities')
-export class ResolvedActivity {
-    name: string;
-    id: string;
-    description: { raw: string; rendered: string };
-    time: string;
+    export interface Data {
+        /**
+         * Refers to an activity by id.
+         */
+        ref: string;
+    }
 
-    constructor(data: ActivityRef, parent: Entity, m: Manifest, c: Converter) {
+    export function process(data: Data, ctx: Component.Context) {
         const ref = `activity.${data.ref}`;
-        const entity = m[ref];
+        const entity = ctx.manifest[ref];
 
         if (entity === undefined)
-            throw `${parent.id} contains an undefined reference: "${ref}!`;
+            throw `${ctx.parent.id} contains an undefined reference: "${ref}!`;
 
         const activity = entity.activity;
 
         if (activity === undefined)
-            throw `${parent.id} references ${entity.id} as an activity, but ${entity.id} lacks the activity component!`;
+            throw `${ctx.parent.id} references ${entity.id} as an activity, but ${entity.id} lacks the activity component!`;
 
-        this.name = entity.name;
-        this.id = entity.id;
-        this.description = {
-            raw: <string>entity.description,
-            rendered: c.makeHtml(<string>entity.description),
+        return {
+            name: entity.name,
+            id: entity.id,
+            description: {
+                raw: entity.description,
+                rendered: ctx.markdown.makeHtml(<string>entity.description),
+            },
+            time: activity.time,
         };
-        this.time = activity.time;
     }
 }

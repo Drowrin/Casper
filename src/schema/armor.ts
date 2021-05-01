@@ -1,19 +1,15 @@
-import { component, requires } from './component';
+import { Component } from './component';
 
-export interface ArmorData {
-    /**
-     * The AC of this armor.
-     * For example, "+2" or "13 + Dex Modifier (max 2)"
-     */
-    ac: string | number;
-}
+Component.register(Armor);
+export namespace Armor {
+    export const KEY = 'armor';
+    export const REQUIRES = ['item'];
 
-@component('armor')
-@requires('item')
-export class Armor {
-    ac: string | number;
-
-    constructor(data: ArmorData) {
-        this.ac = data.ac;
+    export interface Data {
+        /**
+         * The AC of this armor.
+         * For example, "+2" or "13 + Dex Modifier (max 2)"
+         */
+        ac: string | number;
     }
 }

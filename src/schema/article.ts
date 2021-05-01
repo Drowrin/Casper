@@ -1,17 +1,16 @@
-import { Converter } from 'showdown';
-import { Entity, Manifest } from '.';
-import { component, requires } from './component';
+import { Component } from './component';
 
-export type ArticleData = string;
+Component.register(Article);
+export namespace Article {
+    export const KEY = 'article';
+    export const REQUIRES = ['description'];
 
-@component('article')
-@requires('description')
-export class Article {
-    raw: string;
-    rendered: string;
+    export type Data = string;
 
-    constructor(data: ArticleData, _e: Entity, _m: Manifest, c: Converter) {
-        this.raw = data;
-        this.rendered = c.makeHtml(this.raw);
+    export function process(data: Data, { markdown }: Component.Context) {
+        return {
+            raw: data,
+            rendered: markdown.makeHtml(data),
+        };
     }
 }

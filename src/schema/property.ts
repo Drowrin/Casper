@@ -1,99 +1,92 @@
-import { Converter } from 'showdown';
-import { Entity, Manifest } from '.';
-import { component, requires } from './component';
+import { Component } from './component';
 
-export interface PropertyData {
-    /**
-     * Names of args that a property requires. For example, Range requires `normal` and `max` args.
-     * Args are replaced in `description` and `display` wherever `<arg>` appears.
-     * For example, Range.display is "Range(<normal>/<max>)"
-     */
-    args: string[];
+export namespace Property {
+    export const KEY = 'propterty';
 
-    /**
-     * Describes the property. This is different from the root description because args are replaced in it.
-     */
-    description: string;
+    export interface Data {
+        /**
+         * Names of args that a property requires. For example, Range requires `normal` and `max` args.
+         * Args are replaced in `description` and `display` wherever `<arg>` appears.
+         * For example, Range.display is "Range(<normal>/<max>)"
+         */
+        args: string[];
 
-    /**
-     * Optional display string.
-     * If it is undefined, it defaults to the root name. This is useful for unchanging properties like "Heavy".
-     * If it is defined, args are replaced in it before being displayed.
-     */
-    display?: string;
-}
+        /**
+         * Describes the property. This is different from the root description because args are replaced in it.
+         */
+        description: string;
 
-@component('property')
-export class Property {
-    args: string[];
-    description: { raw: string; rendered: string };
-    display?: string;
-    entities: string[];
+        /**
+         * Optional display string.
+         * If it is undefined, it defaults to the root name. This is useful for unchanging properties like "Heavy".
+         * If it is defined, args are replaced in it before being displayed.
+         */
+        display?: string;
+    }
 
-    constructor(data: PropertyData, parent: Entity, m: Manifest, c: Converter) {
-        this.args = data.args;
-        this.description = {
-            raw: data.description,
-            rendered: c.makeHtml(data.description),
-        };
-        this.display = data.display;
+    export function process(data: Data, ctx: Component.Context) {
+        const name = ctx.parent.id.split('.')[1];
+        var entities = [];
 
-        // collect a list of ids of all entities that contain this property
-        const name = parent.id.split('.')[1];
-        this.entities = [];
-        function hasProp(prop: PropertyRef) {
+        function hasProp(prop: Properties.Data) {
             return prop.ref === name;
         }
-        for (const [k, v] of Object.entries(m)) {
+
+        for (const [k, v] of Object.entries(ctx.manifest)) {
             if (v.properties?.some(hasProp)) {
-                this.entities.push(k);
+                entities.push(k);
             }
         }
+
+        return {
+            args: data.args,
+            description: {
+                raw: data.description,
+                rendered: ctx.markdown.makeHtml(data.description),
+            },
+            display: data.display,
+            entities,
+        };
     }
 }
 
-export interface PropertyRef {
-    /**
-     * Refers to a proprty by id.
-     * Like categories, "property$" is added automatically.
-     */
-    ref: string;
+export namespace Properties {
+    export const KEY = 'properties';
+    export const REQUIRES = ['item'];
 
-    /**
-     * Other fields are args used by the property while being resolving.
-     * Not all properties require args.
-     *
-     * Range and Heavy for example:
-     * properties:
-     *   - ref: range
-     *     normal: 30
-     *     max: 60
-     *   - ref: heavy
-     */
-    [key: string]: any;
-}
+    export interface Data {
+        /**
+         * Refers to a proprty by id.
+         * Like categories, "property$" is added automatically.
+         */
+        ref: string;
 
-@component('properties')
-@requires('item')
-export class ResolvedProperty {
-    name: string;
-    id: string;
-    description: { raw: string; rendered: string };
-    display: string;
-    args: { [key: string]: any };
+        /**
+         * Other fields are args used by the property while being resolving.
+         * Not all properties require args.
+         *
+         * Range and Heavy for example:
+         * properties:
+         *   - ref: range
+         *     normal: 30
+         *     max: 60
+         *   - ref: heavy
+         */
+        [key: string]: any;
+    }
 
-    constructor(data: PropertyRef, parent: Entity, m: Manifest, c: Converter) {
+    export function process(data: Data, ctx: Component.Context) {
         // expand ref into full id and get the property entity.
         const ref = `property.${data.ref}`;
-        const entity = m[ref];
+        const entity = ctx.manifest[ref];
 
         if (entity === undefined)
-            throw `${parent.id} contains an undefined reference: "${ref}"!`;
+            throw `${ctx.parent.id} contains an undefined reference: "${ref}"!`;
 
         const property = entity.property;
 
         if (property === undefined)
-            throw `${parent.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`;
+            throw `${ctx.parent.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`;
 
         // process display and description with arg values. replace <argname> with the arg values.
         var description = property.description;
@@ -103,20 +96,22 @@ export class ResolvedProperty {
             // get arg value if it exists. throw error if it doesn't exist
             var val = data[arg];
             if (val === undefined)
-                throw `property ${entity.name} of ${parent.id} is missing arg "${arg}"!`;
+                throw `property ${entity.name} of ${ctx.parent.id} is missing arg "${arg}"!`;
 
             description = description.replace(`<${arg}>`, val);
             display = display.replace(`<${arg}>`, val);
             argmap[arg] = val;
         }
 
-        this.name = entity.name;
-        this.id = entity.id;
-        this.description = {
-            raw: description,
-            rendered: c.makeHtml(description),
+        return {
+            name: entity.name,
+            id: entity.id,
+            description: {
+                raw: description,
+                rendered: ctx.markdown.makeHtml(description),
+            },
+            display: display,
+            args: argmap,
         };
-        this.display = display;
-        this.args = argmap;
     }
 }

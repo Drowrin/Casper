@@ -1,12 +1,8 @@
-import { component } from './component';
+import { Component } from './component';
 
-export type SourceData = string;
+Component.register(Source);
+export namespace Source {
+    export const KEY = 'source';
 
-@component('source')
-export class Source {
-    raw: string;
-
-    constructor(data: SourceData) {
-        this.raw = data;
-    }
+    export type Data = string;
 }

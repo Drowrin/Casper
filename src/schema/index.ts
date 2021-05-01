@@ -1,28 +1,18 @@
 import { Converter } from 'showdown';
-import {
-    Activity,
-    ActivityData,
-    ActivityRef,
-    ResolvedActivity,
-} from './activity';
-import { Armor, ArmorData } from './armor';
-import { Article, ArticleData } from './article';
+import { Activities, Activity } from './activity';
+import { Armor } from './armor';
+import { Article } from './article';
 import { Component } from './component';
-import { Description, DescriptionData } from './description';
-import { Img, ImgData } from './img';
-import { Item, ItemData } from './item';
-import { Proficiency, ProficiencyData } from './proficiency';
-import {
-    Property,
-    PropertyData,
-    PropertyRef,
-    ResolvedProperty,
-} from './property';
-import { Source, SourceData } from './source';
-import { Spell, SpellData } from './spell';
-import { Tool, ToolData } from './tool';
-import { Vehicle, VehicleData } from './vehicle';
-import { Weapon, WeaponData } from './weapon';
+import { Description } from './description';
+import { Img } from './img';
+import { Item } from './item';
+import { Proficiency } from './proficiency';
+import { Properties, Property } from './property';
+import { Source } from './source';
+import { Spell } from './spell';
+import { Tool } from './tool';
+import { Vehicle } from './vehicle';
+import { Weapon } from './weapon';
 
 export interface EntityData {
     /**
@@ -54,83 +44,83 @@ export interface EntityData {
      * Description is optional.
      * Should give a brief overview of an entity, just a few sentences.
      */
-    description?: DescriptionData;
+    description?: Description.Data;
 
     /**
      * Article is for longer text than description--text that is the primary content of the entity.
      * Description is required, as article is too long to be shown in search results.
      */
-    article?: ArticleData;
+    article?: Article.Data;
 
     /**
      * Source is optional.
      * The book or other source that this entity was published in.
      * example: Player's Handbook pg.69
      */
-    source?: SourceData;
+    source?: Source.Data;
 
     /**
      * Optional image to be displayed with an entity.
      */
-    img?: ImgData;
+    img?: Img.Data;
 
     /**
      * A property defines special rules for using equipment.
      * If this entity defines a property that other entities will refer to, it should contain this `property` component.
      */
-    property?: PropertyData;
+    property?: Property.Data;
 
     /**
      * A list of references to properties that this object has.
      */
-    properties?: PropertyRef[];
+    properties?: Properties.Data[];
 
     /**
      * Any entity that is a physical item with at least cost and weight should have this component.
      * This should be present on all items, even if all optional fields are skipped.
      */
-    item?: ItemData;
+    item?: Item.Data;
 
     /**
      * If an entity is armor, it should include this component.
      */
-    armor?: ArmorData;
+    armor?: Armor.Data;
 
     /**
      * If an entity is a weapon, it should include this component.
      */
-    weapon?: WeaponData;
+    weapon?: Weapon.Data;
 
     /**
      * If an entity is a spell, it should include this component.
      */
-    spell?: SpellData;
+    spell?: Spell.Data;
 
     /**
      * If an entity is a vehicle, it should include this component.
      */
-    vehicle?: VehicleData;
+    vehicle?: Vehicle.Data;
 
     /**
      * If an entity describes an activity or action a character can take, it should include this component.
      */
-    activity?: ActivityData;
+    activity?: Activity.Data;
 
     /**
      * A list of activities related to this entity.
      */
-    activities?: ActivityRef[];
+    activities?: Activities.Data[];
 
     /**
      * If an entity represents something that a character can be proficient in, it should have this component.
      */
-    proficiency?: ProficiencyData;
+    proficiency?: Proficiency.Data;
 
     /**
      * The tool component is applied to non-combat equipment that requires proficiency in order to perform special tasks.
      * For example: tools, vehicles, and instruments.
      */
-    tool?: ToolData;
+    tool?: Tool.Data;
 }
 
 export interface CategoryData {
@@ -220,14 +210,14 @@ export const components: Component[] = [
     Img,
     Item,
     Tool,
-    ResolvedProperty,
+    Property,
     Property,
     Armor,
     Weapon,
     Vehicle,
     Proficiency,
     Activity,
-    ResolvedActivity,
+    Activity,
     Spell,
 ];
 
@@ -262,7 +252,7 @@ export class Entity {
         // Check all possible components against the entity data.
         // If a component key matches, the constructed component is added to this Entity.
         for (const comp of components) {
-            comp.resolve?.(data, this, m, c);
+            Component.resolve(comp, data, this, m, c);
         }
     }
 }

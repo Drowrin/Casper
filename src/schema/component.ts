@@ -2,77 +2,110 @@ import { Converter } from 'showdown';
 import { Entity } from '.';
 import { Manifest } from '../schema';
 
-/**
- * Slightly hacky solution
- * Typescript does not support abstract static properties/methods, so this mixin is necessary
- */
-export interface Component {
-    new (...args: any[]): {};
-    resolve?(ed: any, entity: Entity, m: Manifest, c: Converter): void;
-    required?: string[];
-}
+export namespace Component {
+    export interface Context {
+        /**
+         * The initial manifest parsed from the source yaml.
+         * This is a map of string ids to EntityData objects.
+         */
+        manifest: Manifest;
 
-/**
- * Turns a class into a Component class.
- * Adds static methods and fields to the class decorated.
- * Most importanly, adds Class.resolve()
- *
- * Class constructor should accept it's data as the first argument.
- * Optionally it can accept the parent Entity and the Manifest as the second and third argument.
- *
- * If the component root is an array, like `properties`, the class should describe a single array element.
- * The resolver will handle mapping the array to multiple components.
- */
-export function component(key: string) {
-    return function <T extends Component>(Base: T) {
-        let required: string[] = Base?.required ?? [];
+        /**
+         * The current entity being processed.
+         * This is partial/in-progress data, not the source data.
+         * This is the state of the entity directly before this component is added to it.
+         * As such the state should not be relied on, but it can still be used to get entity name, id, and so on.
+         */
+        parent: Entity;
 
-        return class extends Base {
-            static required = required;
+        /**
+         * A pre-confiugured markdown converter from Showdownjs.
+         * Most common usage would be `markdown.makeHtml(string)`.
+         */
+        markdown: Converter;
+    }
 
-            /**
-             * Adds constructed Component to Entity if the Component's key is present in the EntityData
-             * Manifest is used in some contructors so that entities can reference each other.
-             */
-            static resolve(ed: any, entity: Entity, m: Manifest, c: Converter) {
-                const data = ed[key];
+    /**
+     * A collection of all registered components.
+     */
+    export var all: Set<Component> = new Set();
 
-                if (data !== undefined) {
-                    // check that the parent entity contains all of the other components required by this component
-                    for (const req of this.required) {
-                        if (ed[req] === undefined)
-                            throw `${entity.id} does not contain "${req}", which is a requirement for "${key}"`;
-                    }
+    /**
+     * Register a component so it can be accessed globally.
+     * As a side effect, this helps validate namespaces that are intended to become Components.
+     * @param {Component} c The component to be registered
+     */
+    export function register(c: Component) {
+        all.add(c);
+    }
 
-                    // If the data is an array, make an array of components.
-                    // used for stuff like `categories` and `properties`.
-                    if (Array.isArray(data)) {
-                        entity[key] = data.map(
-                            (d: any) => new this(d, entity, m, c)
-                        );
-                    } else {
-                        entity[key] = new this(data, entity, m, c);
-                    }
-                }
-            }
+    /**
+     * Adds constructed Component to Entity if the Component's key is present in the EntityData.
+     * Manifest is used in some contructors so that entities can reference each other.
+     * This function does not return anything, it modifies the parent Entity in-place.
+     * @param {Component} c The component to be resolved
+     * @param {any} data The raw data of the entity currently being parsed
+     * @param {Entity} parent The in-progress state of the output entity
+     * @param {Manifest} manifest The initial manifest parsed from the source yaml
+     * @param {Converter} markdown A pre-confiugured markdown converter from Showdownjs
+     */
+    export function resolve(
+        c: Component,
+        data: any,
+        parent: Entity,
+        manifest: Manifest,
+        markdown: Converter
+    ) {
+        const componentData = data[c.KEY];
+        const ctx: Component.Context = {
+            parent,
+            manifest,
+            markdown,
         };
-    };
+
+        // only operate if this component exists on the entity data
+        if (componentData !== undefined) {
+            // check that the parent entity contains all of the other components required by this component
+            c.REQUIRES?.forEach((r) => {
+                if (data[r] === undefined)
+                    throw `${parent.id} does not contain "${r}", which is a requirement for "${c.KEY}"`;
+            });
+
+            // If the data is an array, make an array of components
+            // used for stuff like `categories` and `properties`
+            if (Array.isArray(componentData)) {
+                parent[c.KEY] = componentData.map((d: any) =>
+                    c.process ? c.process(d, ctx) : d
+                );
+            } else {
+                parent[c.KEY] = c.process
+                    ? c.process(componentData, ctx)
+                    : componentData;
+            }
+        }
+    }
 }
 
-/**
- * Marks a component as requiring one or more other components.
- * Multiple requirements can be handled either by multiple arguments, or by stacking multiple decorators.
- * Each key passed to the decorator should be the key of another component.
- */
-export function requires(...keys: string[]) {
-    return function <T extends Component>(Base: T) {
-        if (Base.required !== undefined) {
-            Base.required.concat(keys);
-            return Base;
-        } else {
-            return class extends Base {
-                static required = keys;
-            };
-        }
-    };
+export interface Component {
+    /**
+     * The key on the root of an entity that will be interpreted as this component.
+     * */
+    KEY: string;
+
+    /**
+     * Array of keys referring to other components that this component requires.
+     * If a required component is not present on an entity, this component's valirdator will fail.
+     */
+    REQUIRES?: string[];
+
+    /**
+     * A function that is called to process input data before it is entered into the final manifest.
+     *
+     * This function is optional. If not present, the data will be copied from source as-is.
+     *
+     * @param {any} data The data for this component, parsed directly from the source yaml
+     * @param {Component.Context} ctx The context of this processing call. See Component.Context for more info
+     * @returns {any} The processed data that will be output into the final manifest
+     */
+    process?(data: any, ctx: Component.Context): any;
 }

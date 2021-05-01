@@ -1,16 +1,15 @@
-import { Converter } from 'showdown';
-import { Entity, Manifest } from '.';
-import { component } from './component';
+import { Component } from './component';
 
-export type DescriptionData = string;
+Component.register(Description);
+export namespace Description {
+    export const KEY = 'description';
 
-@component('description')
-export class Description {
-    raw: string;
-    rendered: string;
+    export type Data = string;
 
-    constructor(data: DescriptionData, _e: Entity, _m: Manifest, c: Converter) {
-        this.raw = data;
-        this.rendered = c.makeHtml(this.raw);
+    export function process(data: Data, { markdown }: Component.Context) {
+        return {
+            raw: data,
+            rendered: markdown.makeHtml(data),
+        };
     }
 }

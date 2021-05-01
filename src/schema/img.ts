@@ -1,17 +1,13 @@
-import { component } from './component';
+import { Component } from './component';
 
-export interface ImgData {
-    /**
-     * @TJS-format uri-reference
-     */
-    uri: string;
-}
+Component.register(Img);
+export namespace Img {
+    export const KEY = 'img';
 
-@component('img')
-export class Img {
-    uri: string;
-
-    constructor(data: ImgData) {
-        this.uri = data.uri;
+    export interface Data {
+        /**
+         * @TJS-format uri-reference
+         */
+        uri: string;
     }
 }
