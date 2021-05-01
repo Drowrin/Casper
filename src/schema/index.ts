@@ -196,27 +196,6 @@ function resolveCategory(
 export type Manifest = { [key: string]: EntityData };
 
 /**
- * Collection of components that will attempt to resolve in each entity
- */
-export const components: Component[] = [
-    Description,
-    Article,
-    Source,
-    Img,
-    Item,
-    Tool,
-    Property,
-    Property,
-    Armor,
-    Weapon,
-    Vehicle,
-    Proficiency,
-    Activity,
-    Activity,
-    Spell,
-];
-
-/**
  * The core of all casper data. Everything is an entity.
  * All entities have a name, id, and at least one category.
  * All the other fields are optional components.
@@ -246,7 +225,7 @@ export class Entity {
 
         // Check all possible components against the entity data.
         // If a component key matches, the constructed component is added to this Entity.
-        for (const comp of components) {
+        for (const comp of Component.all()) {
             Component.resolve(comp, data, this, m, c);
         }
     }

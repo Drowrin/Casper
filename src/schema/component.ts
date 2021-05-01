@@ -28,7 +28,7 @@ export namespace Component {
     /**
      * A collection of all registered components.
      */
-    export var all: Set<Component> = new Set();
+    var list: Component[] = [];
 
     /**
      * Register a component so it can be accessed globally.
@@ -36,7 +36,16 @@ export namespace Component {
      * @param {Component} c The component to be registered
      */
     export function register(c: Component) {
-        all.add(c);
+        if (!list.includes(c)) {
+            list.push(c);
+        }
+    }
+
+    /**
+     * Get the list of all registered components.
+     */
+    export function all() {
+        return list;
     }
 
     /**
