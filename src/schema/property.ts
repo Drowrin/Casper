@@ -26,13 +26,16 @@ export interface PropertyData {
 @component('property')
 export class Property {
     args: string[];
-    description: string;
+    description: { raw: string; rendered: string };
     display?: string;
     entities: string[];
 
-    constructor(data: PropertyData, parent: Entity, m: Manifest) {
+    constructor(data: PropertyData, parent: Entity, m: Manifest, c: Converter) {
         this.args = data.args;
-        this.description = data.description;
+        this.description = {
+            raw: data.description,
+            rendered: c.makeHtml(data.description),
+        };
         this.display = data.display;
 
         // collect a list of ids of all entities that contain this property
