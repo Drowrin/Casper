@@ -1,3 +1,4 @@
+import { Converter } from 'showdown';
 import { Entity, Manifest } from '.';
 import { component, requires } from './component';
 
@@ -30,10 +31,10 @@ export interface ActivityRef {
 export class ResolvedActivity {
     name: string;
     id: string;
-    description: string;
+    description: { raw: string; rendered: string };
     time: string;
 
-    constructor(data: ActivityRef, parent: Entity, m: Manifest) {
+    constructor(data: ActivityRef, parent: Entity, m: Manifest, c: Converter) {
         const ref = `activity.${data.ref}`;
         const entity = m[ref];
 
@@ -47,7 +48,10 @@ export class ResolvedActivity {
 
         this.name = entity.name;
         this.id = entity.id;
-        this.description = <string>entity.description;
+        this.description = {
+            raw: <string>entity.description,
+            rendered: c.makeHtml(<string>entity.description),
+        };
         this.time = activity.time;
     }
 }

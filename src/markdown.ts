@@ -5,7 +5,8 @@ export function casperMarkdown(m: { [key: string]: any }) {
             regex: /\B@([\w.]+)/g,
             replace: function (_: string, id: string) {
                 let name = m[id]?.name || `[Reference Error: ${id}]`;
-                return `<a href="/entity/${id}" class="deferred-router-link">${name}</a>`;
+                let path = id.replace('.', '/');
+                return `<a href="/${path}" class="markdown-entity-link" data-entity-id="${id}">${name}</a>`;
             },
         };
 

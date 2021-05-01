@@ -1,3 +1,4 @@
+import { Converter } from 'showdown';
 import { Entity, Manifest } from '.';
 import { component, requires } from './component';
 
@@ -74,11 +75,11 @@ export interface PropertyRef {
 export class ResolvedProperty {
     name: string;
     id: string;
-    description: string;
+    description: { raw: string; rendered: string };
     display: string;
     args: { [key: string]: any };
 
-    constructor(data: PropertyRef, parent: Entity, m: Manifest) {
+    constructor(data: PropertyRef, parent: Entity, m: Manifest, c: Converter) {
         // expand ref into full id and get the property entity.
         const ref = `property.${data.ref}`;
         const entity = m[ref];
@@ -108,7 +109,10 @@ export class ResolvedProperty {
 
         this.name = entity.name;
         this.id = entity.id;
-        this.description = description;
+        this.description = {
+            raw: description,
+            rendered: c.makeHtml(description),
+        };
         this.display = display;
         this.args = argmap;
     }

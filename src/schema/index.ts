@@ -136,10 +136,12 @@ export interface EntityData {
 export interface CategoryData {
     name: string;
     id: string;
-    description: string;
+    description: { raw: string; rendered: string };
 }
 
-function getAllCategories(m: Manifest): Manifest {
+type CategoryMap = { [key: string]: CategoryData };
+
+export function getAllCategories(m: Manifest, c: Converter): CategoryMap {
     return Object.entries(m)
         .filter(([k, _]) => k.endsWith('*'))
         .reduce((o, [k, v]) => {
@@ -147,14 +149,23 @@ function getAllCategories(m: Manifest): Manifest {
                 throw `${v.id} does not contain "description", which is a requirement to be a category`;
             return {
                 ...o,
-                [k.slice(0, -1)]: v,
+                [k.slice(0, -1)]: {
+                    name: v.name,
+                    id: v.id,
+                    description: {
+                        raw: v.description,
+                        rendered: c.makeHtml(v.description),
+                    },
+                },
             };
         }, {});
 }
 
-function getEntityCategories(data: EntityData, m: Manifest) {
-    const cats = getAllCategories(m);
-
+function getEntityCategories(
+    data: EntityData,
+    cats: CategoryMap,
+    c: Converter
+) {
     let out = [];
 
     for (const [k, v] of Object.entries(cats)) {
@@ -175,13 +186,19 @@ function getEntityCategories(data: EntityData, m: Manifest) {
     return <CategoryData[]>out;
 }
 
-function resolveCategory(ed: EntityData, entity: Entity, m: Manifest) {
+function resolveCategory(
+    ed: EntityData,
+    entity: Entity,
+    m: Manifest,
+    cats: { [key: string]: CategoryData },
+    c: Converter
+) {
     if (ed.id.endsWith('*')) {
         entity.entities = [];
 
         for (const [k, v] of Object.entries(m)) {
             if (
-                getEntityCategories(v, m)
+                getEntityCategories(v, cats, c)
                     .map((e) => e.id)
                     .includes(ed.id)
             ) {
@@ -230,12 +247,17 @@ export class Entity {
     // if the raw data contains a matching field, it is resolved into a component
     [key: string]: any;
 
-    constructor(data: EntityData, m: Manifest, c: Converter) {
+    constructor(
+        data: EntityData,
+        m: Manifest,
+        cats: CategoryMap,
+        c: Converter
+    ) {
         this.name = data.name;
         this.id = data.id;
 
-        this.categories = getEntityCategories(data, m);
-        resolveCategory(data, this, m);
+        this.categories = getEntityCategories(data, cats, c);
+        resolveCategory(data, this, m, cats, c);
 
         // Check all possible components against the entity data.
         // If a component key matches, the constructed component is added to this Entity.

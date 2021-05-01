@@ -5,7 +5,7 @@ import hash = require('object-hash');
 import Fuse from 'fuse.js';
 import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
-import { Entity, EntityData } from './schema';
+import { Entity, EntityData, getAllCategories } from './schema';
 import { exit } from 'process';
 import showdown = require('showdown');
 import { casperMarkdown } from './markdown';
@@ -140,11 +140,13 @@ function resolveEntities(ent: EntityData[]): EntityMap {
         disableForced4SpacesIndentedSublists: true,
     });
 
+    const cats = getAllCategories(d, converter);
+
     // resolve raw entity data into full Entity objects.
     // the Entity constructor does a lot. It recursively resolves and validates each component of this entity.
     var out: { [key: string]: Entity } = {};
     for (var key in d) {
-        out[key] = new Entity(d[key], d, converter);
+        out[key] = new Entity(d[key], d, cats, converter);
     }
 
     return out;
