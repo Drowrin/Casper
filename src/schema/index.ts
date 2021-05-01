@@ -151,11 +151,7 @@ export function getAllCategories(m: Manifest, c: Converter): CategoryMap {
         }, {});
 }
 
-function getEntityCategories(
-    data: EntityData,
-    cats: CategoryMap,
-    c: Converter
-) {
+function getEntityCategories(data: EntityData, cats: CategoryMap) {
     let out = [];
 
     for (const [k, v] of Object.entries(cats)) {
@@ -180,15 +176,14 @@ function resolveCategory(
     ed: EntityData,
     entity: Entity,
     m: Manifest,
-    cats: { [key: string]: CategoryData },
-    c: Converter
+    cats: { [key: string]: CategoryData }
 ) {
     if (ed.id.endsWith('*')) {
         entity.entities = [];
 
         for (const [k, v] of Object.entries(m)) {
             if (
-                getEntityCategories(v, cats, c)
+                getEntityCategories(v, cats)
                     .map((e) => e.id)
                     .includes(ed.id)
             ) {
@@ -246,8 +241,8 @@ export class Entity {
         this.name = data.name;
         this.id = data.id;
 
-        this.categories = getEntityCategories(data, cats, c);
-        resolveCategory(data, this, m, cats, c);
+        this.categories = getEntityCategories(data, cats);
+        resolveCategory(data, this, m, cats);
 
         // Check all possible components against the entity data.
         // If a component key matches, the constructed component is added to this Entity.
