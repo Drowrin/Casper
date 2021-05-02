@@ -27,36 +27,7 @@ export type Manifest = { [key: string]: EntityData };
 
 /**
  * The core of all casper data. Everything is an entity.
- * All entities have a name, id, and at least one category.
- * All the other fields are optional components.
  */
-// export interface Entity {
-//     // optional components
-//     // if the raw data contains a matching field, it is resolved into a component
-//     [key: string]: any;
-
-//     constructor(
-//         data: EntityData,
-//         manifest: Manifest,
-//         categories: Category.Map,
-//         markdown: Converter
-//     ) {
-//         const ctx: Component.Context = {
-//             manifest,
-//             categories,
-//             markdown,
-//             parent: this,
-//             rawData: data,
-//         };
-
-//         // Check all possible components against the entity data.
-//         // If a component key matches, the constructed component is added to this Entity.
-//         for (const comp of Component.all()) {
-//             Component.resolve(comp, data, ctx);
-//         }
-//     }
-// }
-
 export interface Entity {
     [key: string]: any;
 }
@@ -115,7 +86,6 @@ export function resolveEntities(ent: EntityData[]): { [key: string]: Entity } {
     // the initial state of the output manifest before entities are resolved
     var out: { [key: string]: Entity } = {};
     for (var key in d) {
-        // out[key] = new Entity(d[key], d, cats, converter);
         out[key] = {};
     }
 
