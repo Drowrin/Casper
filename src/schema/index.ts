@@ -81,7 +81,7 @@ function getEntityCategories(data: EntityData, cats: CategoryMap) {
     let out = [];
 
     for (const [k, v] of Object.entries(cats)) {
-        if (data.id.startsWith(k)) {
+        if (data.id.startsWith(k) && data.id != `${k}*`) {
             out.push(v);
         }
     }
