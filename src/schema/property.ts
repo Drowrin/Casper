@@ -25,7 +25,7 @@ export namespace Property {
     }
 
     export function process(data: Data, ctx: Component.Context) {
-        const name = ctx.parent.id.split('.')[1];
+        const name = ctx.id.split('.')[1];
         var entities = [];
 
         function hasProp(prop: Properties.Data) {
@@ -93,12 +93,12 @@ export namespace Properties {
             const entity = ctx.manifest[ref];
 
             if (entity === undefined)
-                throw `${ctx.parent.id} contains an undefined reference: "${ref}"!`;
+                throw `${ctx.id} contains an undefined reference: "${ref}"!`;
 
             const property = entity.property;
 
             if (property === undefined)
-                throw `${ctx.parent.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`;
+                throw `${ctx.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`;
 
             // process display and description with arg values. replace <argname> with the arg values.
             var description = property.description;
@@ -108,7 +108,7 @@ export namespace Properties {
                 // get arg value if it exists. throw error if it doesn't exist
                 var val = d[arg];
                 if (val === undefined)
-                    throw `property ${entity.name} of ${ctx.parent.id} is missing arg "${arg}"!`;
+                    throw `property ${entity.name} of ${ctx.id} is missing arg "${arg}"!`;
 
                 description = description.replace(`<${arg}>`, val);
                 display = display.replace(`<${arg}>`, val);

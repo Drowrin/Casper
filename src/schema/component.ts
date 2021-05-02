@@ -20,6 +20,11 @@ export namespace Component {
         parent: Entity;
 
         /**
+         * A shortcut to the id of the current entity being processed.
+         */
+        id: string;
+
+        /**
          * The entity data parsed from the source without any processing.
          */
         data: EntityData;
@@ -87,7 +92,7 @@ export namespace Component {
             // check that the parent entity contains all of the other components required by this component
             c.REQUIRES?.forEach((r) => {
                 if ((<any>ctx.data)[r] === undefined)
-                    throw `${ctx.parent.id} does not contain "${r}", which is a requirement for "${c.KEY}"`;
+                    throw `${ctx.id} does not contain "${r}", which is a requirement for "${c.KEY}"`;
             });
 
             let out = process(cData, ctx);

@@ -39,12 +39,12 @@ export namespace Activities {
             const entity = ctx.manifest[ref];
 
             if (entity === undefined)
-                throw `${ctx.parent.id} contains an undefined reference: "${ref}!`;
+                throw `${ctx.id} contains an undefined reference: "${ref}!`;
 
             const activity = entity.activity;
 
             if (activity === undefined)
-                throw `${ctx.parent.id} references ${entity.id} as an activity, but ${entity.id} lacks the activity component!`;
+                throw `${ctx.id} references ${entity.id} as an activity, but ${entity.id} lacks the activity component!`;
 
             return {
                 name: entity.name,

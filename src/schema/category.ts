@@ -38,7 +38,7 @@ export namespace Category {
     export type Map = { [key: string]: Data };
 
     export function trigger(ctx: Component.Context) {
-        return ctx.data.id.endsWith('*');
+        return ctx.id.endsWith('*');
     }
 
     export function process(_: void, ctx: Component.Context) {
@@ -48,7 +48,7 @@ export namespace Category {
             let entityCatIDs = getEntityCategories(v, ctx.categories).map(
                 (e) => e.id
             );
-            if (entityCatIDs.includes(ctx.parent.id)) {
+            if (entityCatIDs.includes(ctx.id)) {
                 entities.push(k);
             }
         }

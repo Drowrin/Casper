@@ -93,6 +93,7 @@ export function resolveEntities(ent: EntityData[]): { [key: string]: Entity } {
     for (const comp of Component.all()) {
         for (var [k, v] of Object.entries(out)) {
             let ctx: Component.Context = {
+                id: k,
                 manifest: d,
                 parent: v,
                 data: d[k],
