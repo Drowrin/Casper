@@ -33,16 +33,6 @@ export interface EntityData {
      * @TJS-pattern ^\w+(.(\w+|\*))*$
      */
     id: string;
-
-    /**
-     * Some entities belong to multiple categories.
-     * Additional categories that do not fit in the id can be added here.
-     * Example:
-     * categories:
-     *   - weapon.martial
-     *   - weapon.ranged
-     */
-    categories?: string[];
 }
 
 export type Manifest = { [key: string]: EntityData };

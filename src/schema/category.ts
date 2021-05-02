@@ -72,3 +72,17 @@ export namespace Categories {
     }
 }
 Component.register(Categories);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * Some entities belong to multiple categories.
+         * Additional categories that do not fit in the id can be added here.
+         * Example:
+         * categories:
+         *   - weapon.martial
+         *   - weapon.ranged
+         */
+        categories?: string[];
+    }
+}
