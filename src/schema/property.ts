@@ -49,6 +49,17 @@ export namespace Property {
         };
     }
 }
+Component.register(Property);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * A property defines special rules for using equipment.
+         * If this entity defines a property that other entities will refer to, it should contain this `property` component.
+         */
+        property?: Property.Data;
+    }
+}
 
 export namespace Properties {
     export const KEY = 'properties';
@@ -113,5 +124,15 @@ export namespace Properties {
             display: display,
             args: argmap,
         };
+    }
+}
+Component.register(Properties);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * A list of references to properties that this object has.
+         */
+        properties?: Properties.Data[];
     }
 }

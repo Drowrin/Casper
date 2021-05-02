@@ -1,6 +1,5 @@
 import { Component } from './component';
 
-Component.register(Spell);
 export namespace Spell {
     export const KEY = 'spell';
     export const REQUIRES = ['description'];
@@ -118,5 +117,15 @@ export namespace Spell {
          * The extra effects of the spell when cast at a higher level, if any.
          */
         upcast?: UpcastData;
+    }
+}
+Component.register(Spell);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * If an entity is a spell, it should include this component.
+         */
+        spell?: Spell.Data;
     }
 }

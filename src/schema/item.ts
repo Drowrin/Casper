@@ -38,7 +38,6 @@ export namespace Value {
     }
 }
 
-Component.register(Item);
 export namespace Item {
     export const KEY = 'item';
 
@@ -59,5 +58,16 @@ export namespace Item {
          * @default 1
          */
         bundle: number;
+    }
+}
+Component.register(Item);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * Any entity that is a physical item with at least cost and weight should have this component.
+         * This should be present on all items, even if all optional fields are skipped.
+         */
+        item?: Item.Data;
     }
 }

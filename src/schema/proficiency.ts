@@ -1,6 +1,5 @@
 import { Component } from './component';
 
-Component.register(Proficiency);
 export namespace Proficiency {
     export const KEY = 'proficiency';
     export const REQUIRES = ['description'];
@@ -29,5 +28,15 @@ export namespace Proficiency {
              */
             effect: string;
         }>;
+    }
+}
+Component.register(Proficiency);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * If an entity represents something that a character can be proficient in, it should have this component.
+         */
+        proficiency?: Proficiency.Data;
     }
 }

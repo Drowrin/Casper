@@ -1,6 +1,5 @@
 import { Component } from './component';
 
-Component.register(Activity);
 export namespace Activity {
     export const KEY = 'activity';
     export const REQUIRES = ['description'];
@@ -13,8 +12,17 @@ export namespace Activity {
         time: string;
     }
 }
+Component.register(Activity);
 
-Component.register(Activities);
+declare module '.' {
+    export interface EntityData {
+        /**
+         * If an entity describes an activity or action a character can take, it should include this component.
+         */
+        activity?: Activity.Data;
+    }
+}
+
 export namespace Activities {
     export const KEY = 'activities';
 
@@ -46,5 +54,15 @@ export namespace Activities {
             },
             time: activity.time,
         };
+    }
+}
+Component.register(Activities);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * A list of activities related to this entity.
+         */
+        activities?: Activities.Data[];
     }
 }

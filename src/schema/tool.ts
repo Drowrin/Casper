@@ -1,7 +1,6 @@
 import { AbilityCheck } from './abilitycheck';
 import { Component } from './component';
 
-Component.register(Tool);
 export namespace Tool {
     export const KEY = 'tool';
     export const REQUIRES = ['item', 'proficiency'];
@@ -19,5 +18,16 @@ export namespace Tool {
          * Examples of simple tasks this tool can do with a skill check.
          */
         checks?: AbilityCheck.Data[];
+    }
+}
+Component.register(Tool);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * The tool component is applied to non-combat equipment that requires proficiency in order to perform special tasks.
+         * For example: tools, vehicles, and instruments.
+         */
+        tool?: Tool.Data;
     }
 }

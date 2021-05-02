@@ -1,6 +1,5 @@
 import { Component } from './component';
 
-Component.register(Vehicle);
 export namespace Vehicle {
     export const KEY = 'vehicle';
     export const REQUIRES = ['tool', 'item', 'proficiency'];
@@ -11,5 +10,15 @@ export namespace Vehicle {
         speed?: string;
         capacity?: string;
         workers?: string;
+    }
+}
+Component.register(Vehicle);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * If an entity is a vehicle, it should include this component.
+         */
+        vehicle?: Vehicle.Data;
     }
 }

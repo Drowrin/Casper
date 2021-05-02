@@ -1,6 +1,5 @@
 import { Component } from './component';
 
-Component.register(Description);
 export namespace Description {
     export const KEY = 'description';
 
@@ -11,5 +10,16 @@ export namespace Description {
             raw: data,
             rendered: markdown.makeHtml(data),
         };
+    }
+}
+Component.register(Description);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * Description is optional.
+         * Should give a brief overview of an entity, just a few sentences.
+         */
+        description?: Description.Data;
     }
 }

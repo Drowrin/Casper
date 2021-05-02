@@ -1,6 +1,5 @@
 import { Component } from './component';
 
-Component.register(Weapon);
 export namespace Weapon {
     export const KEY = 'weapon';
     export const REQUIRES = ['item'];
@@ -18,5 +17,15 @@ export namespace Weapon {
          * Optional -- useful for weapons like the Net.
          */
         type?: string;
+    }
+}
+Component.register(Weapon);
+
+declare module '.' {
+    export interface EntityData {
+        /**
+         * If an entity is a weapon, it should include this component.
+         */
+        weapon?: Weapon.Data;
     }
 }
