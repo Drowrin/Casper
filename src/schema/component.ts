@@ -57,11 +57,51 @@ export namespace Component {
         }
     }
 
+    function dependencies(c: Component) {
+        let wait_for = c.WAIT_FOR || [];
+        let requires = c.REQUIRES || [];
+        let hoists = c.HOIST
+            ? [] // If this is a HOISTed component, do not require other HOISTed components
+            : list.filter((c) => c.HOIST).map((c) => c.KEY);
+
+        return Array.from(new Set([...wait_for, ...requires, ...hoists]));
+    }
+
     /**
      * Get the list of all registered components.
+     * Topographically sorted based on WAIT_FOR.
      */
     export function all(): Component[] {
-        return list;
+        let _list = list.map((c) => {
+            return {
+                node: c,
+                dep: dependencies(c),
+            };
+        });
+
+        let out = [];
+        let no_edges = _list.filter((c) => c.dep.length == 0);
+
+        while (no_edges.length > 0) {
+            let n = <any>no_edges.pop();
+
+            out.push(n);
+
+            for (var m of _list) {
+                let i = m.dep.indexOf(n.node.KEY);
+
+                if (i !== undefined && i >= 0) {
+                    console.log(`${n.node.KEY} is sorted before ${m.node.KEY}`);
+                    m.dep.splice(i, 1);
+
+                    if (m.dep.length == 0) {
+                        no_edges.push(m);
+                    }
+                }
+            }
+        }
+
+        return out.map((c) => c.node);
     }
 
     /**
@@ -115,6 +155,20 @@ export interface Component {
      * If a required component is not present on an entity, this component's valirdator will fail.
      */
     REQUIRES?: string[];
+
+    /**
+     * Hoist to the top of the Topographical sort. The sort will try to keep this element early in the order.
+     * Internally, marks all non-HOIST-ed components to WAIT_FOR this one.
+     */
+    HOIST?: boolean;
+
+    /**
+     * Array of keys referring to other components that must be processed before this one.
+     * REQUIRES is automatically included in this list. WAIT_FOR should include things not present in REQUIRES.
+     * Different from REQUIRES, in that these components do not need to be present on the entity being processed.
+     * For example, a component may need to wait for other entities' descriptions to be rendered.
+     */
+    WAIT_FOR?: string[];
 
     /**
      * A function to determine if this component's processing should trigger.

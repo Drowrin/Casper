@@ -90,7 +90,9 @@ export function resolveEntities(ent: EntityData[]): { [key: string]: Entity } {
     }
 
     // resolve components in order
-    for (const comp of Component.all()) {
+    let components = Component.all();
+    console.log(components.map((c) => c.KEY));
+    for (const comp of components) {
         for (var [k, v] of Object.entries(out)) {
             let ctx: Component.Context = {
                 id: k,

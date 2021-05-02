@@ -2,6 +2,7 @@ import { Component } from './component';
 
 export namespace Id {
     export const KEY = 'id';
+    export const HOIST = true;
 
     export type Data = string;
 }

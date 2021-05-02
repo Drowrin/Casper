@@ -60,6 +60,7 @@ Component.register(Category);
 
 export namespace Categories {
     export const KEY = 'categories';
+    export const WAIT_FOR = ['entities']; // wait for Categories to be processed
 
     export function trigger(_: Component.Context) {
         return true; // All entities should have categories processed
