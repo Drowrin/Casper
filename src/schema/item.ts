@@ -1,4 +1,4 @@
-import { Component } from './component';
+import { Component } from '../component';
 
 export namespace Value {
     export interface Data {

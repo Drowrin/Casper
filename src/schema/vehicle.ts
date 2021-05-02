@@ -1,4 +1,4 @@
-import { Component } from './component';
+import { Component } from '../component';
 
 export namespace Vehicle {
     export const KEY = 'vehicle';

@@ -1,5 +1,5 @@
 import { AbilityCheck } from './abilitycheck';
-import { Component } from './component';
+import { Component } from '../component';
 
 export namespace Tool {
     export const KEY = 'tool';

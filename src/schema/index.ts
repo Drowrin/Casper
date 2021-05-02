@@ -17,7 +17,7 @@ import './tool';
 import './vehicle';
 import './weapon';
 
-import { Component } from './component';
+import { Component } from '../component';
 import { Category } from './category';
 import { casperMarkdown } from '../markdown';
 

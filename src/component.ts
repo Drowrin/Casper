@@ -1,6 +1,6 @@
 import { Converter } from 'showdown';
-import { Entity, EntityData, EntityMap, Manifest } from '.';
-import { Category } from './category';
+import { Entity, EntityData, EntityMap, Manifest } from './schema';
+import { Category } from './schema/category';
 
 export namespace Component {
     export interface Context {
