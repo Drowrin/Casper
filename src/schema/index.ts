@@ -130,7 +130,7 @@ export class Entity {
     name: string;
     id: string;
 
-    categories: CategoryData[];
+    categories?: CategoryData[];
 
     // optional components
     // if the raw data contains a matching field, it is resolved into a component
@@ -146,7 +146,9 @@ export class Entity {
         this.id = data.id;
 
         // TODO: convert these category methods to more standard components?
-        this.categories = getEntityCategories(data, cats);
+        let entityCats = getEntityCategories(data, cats);
+        if (entityCats.length > 0) this.categories = entityCats;
+
         resolveCategory(this, manifest, cats);
 
         // Check all possible components against the entity data.
