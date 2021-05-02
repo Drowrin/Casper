@@ -3,12 +3,13 @@ import fs = require('fs');
 import path = require('path');
 import hash = require('object-hash');
 import Fuse from 'fuse.js';
-import Ajv, { ErrorObject } from 'ajv';
+import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { Entity, EntityData, getAllCategories } from './schema';
+import { Entity, EntityData, Manifest } from './schema';
 import { exit } from 'process';
-import showdown = require('showdown');
+import { Converter } from 'showdown';
 import { casperMarkdown } from './markdown';
+import { Category } from './schema/category';
 
 /**
  * Load all YAML files in a directory recursively.
@@ -115,6 +116,29 @@ function loadFiles(...mainDataDirs: string[]): EntityData[] {
 type EntityMap = { [key: string]: Entity };
 
 /**
+ * Gets all entities that are considered categories and renders them with markdown.
+ */
+export function getAllCategories(m: Manifest, c: Converter): Category.Map {
+    return Object.entries(m)
+        .filter(([k, _]) => k.endsWith('*'))
+        .reduce((o, [k, v]) => {
+            if (v.description === undefined)
+                throw `${v.id} does not contain "description", which is a requirement to be a category`;
+            return {
+                ...o,
+                [k.slice(0, -1)]: {
+                    name: v.name,
+                    id: v.id,
+                    description: {
+                        raw: v.description,
+                        rendered: c.makeHtml(v.description),
+                    },
+                },
+            };
+        }, {});
+}
+
+/**
  * Take raw data and resolve into Entity objects.
  */
 function resolveEntities(ent: EntityData[]): EntityMap {
@@ -126,7 +150,7 @@ function resolveEntities(ent: EntityData[]): EntityMap {
         d[e.id] = e;
     }
 
-    let converter = new showdown.Converter({
+    let converter = new Converter({
         extensions: [casperMarkdown(d)],
 
         ghCompatibleHeaderId: true,

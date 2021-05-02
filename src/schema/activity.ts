@@ -33,27 +33,29 @@ export namespace Activities {
         ref: string;
     }
 
-    export function process(data: Data, ctx: Component.Context) {
-        const ref = `activity.${data.ref}`;
-        const entity = ctx.manifest[ref];
+    export function process(data: Data[], ctx: Component.Context) {
+        return data.map((d) => {
+            const ref = `activity.${d.ref}`;
+            const entity = ctx.manifest[ref];
 
-        if (entity === undefined)
-            throw `${ctx.parent.id} contains an undefined reference: "${ref}!`;
+            if (entity === undefined)
+                throw `${ctx.parent.id} contains an undefined reference: "${ref}!`;
 
-        const activity = entity.activity;
+            const activity = entity.activity;
 
-        if (activity === undefined)
-            throw `${ctx.parent.id} references ${entity.id} as an activity, but ${entity.id} lacks the activity component!`;
+            if (activity === undefined)
+                throw `${ctx.parent.id} references ${entity.id} as an activity, but ${entity.id} lacks the activity component!`;
 
-        return {
-            name: entity.name,
-            id: entity.id,
-            description: {
-                raw: entity.description,
-                rendered: ctx.markdown.makeHtml(<string>entity.description),
-            },
-            time: activity.time,
-        };
+            return {
+                name: entity.name,
+                id: entity.id,
+                description: {
+                    raw: entity.description,
+                    rendered: ctx.markdown.makeHtml(<string>entity.description),
+                },
+                time: activity.time,
+            };
+        });
     }
 }
 Component.register(Activities);

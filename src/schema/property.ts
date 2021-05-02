@@ -86,44 +86,46 @@ export namespace Properties {
         [key: string]: any;
     }
 
-    export function process(data: Data, ctx: Component.Context) {
-        // expand ref into full id and get the property entity.
-        const ref = `property.${data.ref}`;
-        const entity = ctx.manifest[ref];
+    export function process(data: Data[], ctx: Component.Context) {
+        return data.map((d) => {
+            // expand ref into full id and get the property entity.
+            const ref = `property.${d.ref}`;
+            const entity = ctx.manifest[ref];
 
-        if (entity === undefined)
-            throw `${ctx.parent.id} contains an undefined reference: "${ref}"!`;
+            if (entity === undefined)
+                throw `${ctx.parent.id} contains an undefined reference: "${ref}"!`;
 
-        const property = entity.property;
+            const property = entity.property;
 
-        if (property === undefined)
-            throw `${ctx.parent.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`;
+            if (property === undefined)
+                throw `${ctx.parent.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`;
 
-        // process display and description with arg values. replace <argname> with the arg values.
-        var description = property.description;
-        var display = property.display || entity.name;
-        var argmap: { [key: string]: any } = {};
-        for (const arg of property.args) {
-            // get arg value if it exists. throw error if it doesn't exist
-            var val = data[arg];
-            if (val === undefined)
-                throw `property ${entity.name} of ${ctx.parent.id} is missing arg "${arg}"!`;
+            // process display and description with arg values. replace <argname> with the arg values.
+            var description = property.description;
+            var display = property.display || entity.name;
+            var argmap: { [key: string]: any } = {};
+            for (const arg of property.args) {
+                // get arg value if it exists. throw error if it doesn't exist
+                var val = d[arg];
+                if (val === undefined)
+                    throw `property ${entity.name} of ${ctx.parent.id} is missing arg "${arg}"!`;
 
-            description = description.replace(`<${arg}>`, val);
-            display = display.replace(`<${arg}>`, val);
-            argmap[arg] = val;
-        }
+                description = description.replace(`<${arg}>`, val);
+                display = display.replace(`<${arg}>`, val);
+                argmap[arg] = val;
+            }
 
-        return {
-            name: entity.name,
-            id: entity.id,
-            description: {
-                raw: description,
-                rendered: ctx.markdown.makeHtml(description),
-            },
-            display: display,
-            args: argmap,
-        };
+            return {
+                name: entity.name,
+                id: entity.id,
+                description: {
+                    raw: description,
+                    rendered: ctx.markdown.makeHtml(description),
+                },
+                display: display,
+                args: argmap,
+            };
+        });
     }
 }
 Component.register(Properties);

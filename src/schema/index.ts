@@ -3,6 +3,7 @@ import { Converter } from 'showdown';
 import './activity';
 import './armor';
 import './article';
+import './category';
 import './description';
 import './img';
 import './item';
@@ -15,6 +16,7 @@ import './vehicle';
 import './weapon';
 
 import { Component } from './component';
+import { Category } from './category';
 
 export interface EntityData {
     /**
@@ -43,77 +45,6 @@ export interface EntityData {
     categories?: string[];
 }
 
-export interface CategoryData {
-    name: string;
-    id: string;
-    description: { raw: string; rendered: string };
-}
-
-export type CategoryMap = { [key: string]: CategoryData };
-
-/**
- * Gets all entities that are considered categories and renders them with markdown.
- */
-export function getAllCategories(m: Manifest, c: Converter): CategoryMap {
-    return Object.entries(m)
-        .filter(([k, _]) => k.endsWith('*'))
-        .reduce((o, [k, v]) => {
-            if (v.description === undefined)
-                throw `${v.id} does not contain "description", which is a requirement to be a category`;
-            return {
-                ...o,
-                [k.slice(0, -1)]: {
-                    name: v.name,
-                    id: v.id,
-                    description: {
-                        raw: v.description,
-                        rendered: c.makeHtml(v.description),
-                    },
-                },
-            };
-        }, {});
-}
-
-/**
- * Get a list of all the categories this entity belongs to.
- */
-function getEntityCategories(data: EntityData, cats: CategoryMap) {
-    let out = [];
-
-    for (const [k, v] of Object.entries(cats)) {
-        if (data.id.startsWith(k) && data.id != `${k}*`) {
-            out.push(v);
-        }
-    }
-
-    data.categories?.forEach((e) => {
-        const cat = cats[`${e}.`];
-
-        if (cat === undefined)
-            throw `${data.id} contains an undefined reference: "${e}"`;
-
-        out.push(cat);
-    });
-
-    return <CategoryData[]>out;
-}
-
-/**
- * Determine if this entity is a category, and if so, put a list of all its members at entity.entities.
- */
-function resolveCategory(entity: Entity, m: Manifest, cats: CategoryMap) {
-    if (entity.id.endsWith('*')) {
-        entity.entities = [];
-
-        for (const [k, v] of Object.entries(m)) {
-            let entityCatIDs = getEntityCategories(v, cats).map((e) => e.id);
-            if (entityCatIDs.includes(entity.id)) {
-                entity.entities.push(k);
-            }
-        }
-    }
-}
-
 export type Manifest = { [key: string]: EntityData };
 
 /**
@@ -126,8 +57,6 @@ export class Entity {
     name: string;
     id: string;
 
-    categories?: CategoryData[];
-
     // optional components
     // if the raw data contains a matching field, it is resolved into a component
     [key: string]: any;
@@ -135,23 +64,18 @@ export class Entity {
     constructor(
         data: EntityData,
         manifest: Manifest,
-        categories: CategoryMap,
+        categories: Category.Map,
         markdown: Converter
     ) {
         this.name = data.name;
         this.id = data.id;
-
-        // TODO: convert these category methods to more standard components?
-        let entityCats = getEntityCategories(data, categories);
-        if (entityCats.length > 0) this.categories = entityCats;
-
-        resolveCategory(this, manifest, categories);
 
         const ctx: Component.Context = {
             manifest,
             categories,
             markdown,
             parent: this,
+            rawData: data,
         };
 
         // Check all possible components against the entity data.

@@ -1,6 +1,7 @@
 import { Converter } from 'showdown';
-import { CategoryMap, Entity } from '.';
+import { Entity, EntityData } from '.';
 import { Manifest } from '../schema';
+import { Category } from './category';
 
 export namespace Component {
     export interface Context {
@@ -19,6 +20,11 @@ export namespace Component {
         parent: Entity;
 
         /**
+         * The entity data parsed from the source without any processing.
+         */
+        rawData: EntityData;
+
+        /**
          * A pre-confiugured markdown converter from Showdownjs.
          * Most common usage would be `markdown.makeHtml(string)`.
          */
@@ -27,7 +33,7 @@ export namespace Component {
         /**
          * All valid categories. A map from string ids to CategoryData.
          */
-        categories: CategoryMap;
+        categories: Category.Map;
     }
 
     /**
@@ -72,15 +78,8 @@ export namespace Component {
                     throw `${ctx.parent.id} does not contain "${r}", which is a requirement for "${c.KEY}"`;
             });
 
-            // If the data is an array, make an array of components
-            // used for stuff like `categories` and `properties`
-            if (Array.isArray(cData)) {
-                ctx.parent[c.KEY] = cData.map(
-                    (d: any) => c.process?.(d, ctx) || d
-                );
-            } else {
-                ctx.parent[c.KEY] = c.process?.(cData, ctx) || cData;
-            }
+            let out = c.process?.(cData, ctx) || cData;
+            if (out !== undefined) ctx.parent[c.KEY] = out;
         }
     }
 }
