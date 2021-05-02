@@ -36,7 +36,7 @@ export namespace Activities {
     export function process(data: Data[], ctx: Component.Context) {
         return data.map((d) => {
             const ref = `activity.${d.ref}`;
-            const entity = ctx.manifest[ref];
+            const entity = ctx.entities[ref];
 
             if (entity === undefined)
                 throw `${ctx.id} contains an undefined reference: "${ref}!`;

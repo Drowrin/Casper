@@ -23,7 +23,7 @@ import { casperMarkdown } from '../markdown';
 
 export interface EntityData {}
 
-export type Manifest = { [key: string]: EntityData };
+export type EntityMap = { [key: string]: EntityData };
 
 /**
  * The core of all casper data. Everything is an entity.
@@ -33,9 +33,16 @@ export interface Entity {
 }
 
 /**
+ * The output data, a map of Entities.
+ */
+export interface Manifest {
+    [key: string]: Entity;
+}
+
+/**
  * Gets all entities that are considered categories and renders them with markdown.
  */
-export function getAllCategories(m: Manifest, c: Converter): Category.Map {
+export function getAllCategories(m: EntityMap, c: Converter): Category.Map {
     return Object.entries(m)
         .filter(([k, _]) => k.endsWith('*'))
         .reduce((o, [k, v]) => {
@@ -58,9 +65,9 @@ export function getAllCategories(m: Manifest, c: Converter): Category.Map {
 /**
  * Take raw data and resolve into Entity objects.
  */
-export function resolveEntities(ent: EntityData[]): { [key: string]: Entity } {
+export function resolveEntities(ent: EntityData[]): Manifest {
     // Initial validation of data. Sort into id -> entity map so that entities can reference each other while resolving
-    var d: Manifest = {};
+    var d: EntityMap = {};
     for (var e of ent) {
         if (e.id in d) throw `Duplicate id ${e.id}\n${e.name}\n${d[e.id].name}`;
 
@@ -94,7 +101,8 @@ export function resolveEntities(ent: EntityData[]): { [key: string]: Entity } {
         for (var [k, v] of Object.entries(out)) {
             let ctx: Component.Context = {
                 id: k,
-                manifest: d,
+                entities: d,
+                manifest: out,
                 parent: v,
                 data: d[k],
                 markdown: converter,

@@ -32,7 +32,7 @@ export namespace Property {
             return prop.ref === name;
         }
 
-        for (const [k, v] of Object.entries(ctx.manifest)) {
+        for (const [k, v] of Object.entries(ctx.entities)) {
             if (v.properties?.some(hasProp)) {
                 entities.push(k);
             }
@@ -90,7 +90,7 @@ export namespace Properties {
         return data.map((d) => {
             // expand ref into full id and get the property entity.
             const ref = `property.${d.ref}`;
-            const entity = ctx.manifest[ref];
+            const entity = ctx.entities[ref];
 
             if (entity === undefined)
                 throw `${ctx.id} contains an undefined reference: "${ref}"!`;

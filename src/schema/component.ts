@@ -1,13 +1,18 @@
 import { Converter } from 'showdown';
-import { Entity, EntityData } from '.';
-import { Manifest } from '../schema';
+import { Entity, EntityData, EntityMap, Manifest } from '.';
 import { Category } from './category';
 
 export namespace Component {
     export interface Context {
         /**
-         * The initial manifest parsed from the source yaml.
+         * The initial entities parsed from the source yaml.
          * This is a map of string ids to EntityData objects.
+         */
+        entities: EntityMap;
+
+        /**
+         * The full map of in-progress entities in their current state.
+         * A component can read already processed data here from components that have already run.
          */
         manifest: Manifest;
 
@@ -105,7 +110,6 @@ export namespace Component {
 
     /**
      * Adds constructed Component to Entity if the Component's key is present in the EntityData.
-     * Manifest is used in some contructors so that entities can reference each other.
      * This function does not return anything, it modifies the parent Entity in-place.
      * @param {Component} c The component to be resolved
      * @param {Component.Context} ctx The context of resolving this entity

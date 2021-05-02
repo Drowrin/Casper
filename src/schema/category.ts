@@ -44,7 +44,7 @@ export namespace Category {
     export function process(_: void, ctx: Component.Context) {
         let entities = [];
 
-        for (const [k, v] of Object.entries(ctx.manifest)) {
+        for (const [k, v] of Object.entries(ctx.entities)) {
             let entityCatIDs = getEntityCategories(v, ctx.categories).map(
                 (e) => e.id
             );

@@ -5,7 +5,13 @@ import hash = require('object-hash');
 import Fuse from 'fuse.js';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { Entity, EntityData, Manifest, resolveEntities } from './schema';
+import {
+    Entity,
+    EntityData,
+    EntityMap,
+    Manifest,
+    resolveEntities,
+} from './schema';
 import { exit } from 'process';
 
 /**
@@ -138,7 +144,7 @@ const fuseKeys = [
  * Serialized to JSON before being sent to clients.
  */
 export class Casper {
-    manifest: { [key: string]: Entity };
+    manifest: Manifest;
     length: number;
     index: Fuse.FuseIndex<Entity>;
     hash: string;
