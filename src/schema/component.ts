@@ -91,7 +91,6 @@ export namespace Component {
                 let i = m.dep.indexOf(n.node.KEY);
 
                 if (i !== undefined && i >= 0) {
-                    console.log(`${n.node.KEY} is sorted before ${m.node.KEY}`);
                     m.dep.splice(i, 1);
 
                     if (m.dep.length == 0) {
