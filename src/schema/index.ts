@@ -5,8 +5,10 @@ import './armor';
 import './article';
 import './category';
 import './description';
+import './id';
 import './img';
 import './item';
+import './name';
 import './proficiency';
 import './property';
 import './source';
@@ -18,22 +20,7 @@ import './weapon';
 import { Component } from './component';
 import { Category } from './category';
 
-export interface EntityData {
-    /**
-     * Every entity needs a name. This does not have to be unique, just descriptive.
-     */
-    name: string;
-
-    /**
-     * Every entity needs an id. This needs to be unique.
-     * Convention is namespaced ids, separated by .
-     * For example, "tool.smithing" or "tool.instrument.drum".
-     * These namespaces are categories.
-     * A category should be an existing entity with an id like "tool.*" or "tool.instrument.*"
-     * @TJS-pattern ^\w+(.(\w+|\*))*$
-     */
-    id: string;
-}
+export interface EntityData {}
 
 export type Manifest = { [key: string]: EntityData };
 
@@ -43,10 +30,6 @@ export type Manifest = { [key: string]: EntityData };
  * All the other fields are optional components.
  */
 export class Entity {
-    // required fields
-    name: string;
-    id: string;
-
     // optional components
     // if the raw data contains a matching field, it is resolved into a component
     [key: string]: any;
@@ -57,9 +40,6 @@ export class Entity {
         categories: Category.Map,
         markdown: Converter
     ) {
-        this.name = data.name;
-        this.id = data.id;
-
         const ctx: Component.Context = {
             manifest,
             categories,

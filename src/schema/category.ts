@@ -38,7 +38,7 @@ export namespace Category {
     export type Map = { [key: string]: Data };
 
     export function trigger(_: void, ctx: Component.Context) {
-        return ctx.parent.id.endsWith('*');
+        return ctx.rawData.id.endsWith('*');
     }
 
     export function process(_: void, ctx: Component.Context) {
