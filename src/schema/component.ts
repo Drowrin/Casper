@@ -62,10 +62,10 @@ export namespace Component {
      * @param {Component.Context} ctx The context of resolving this entity
      */
     export function resolve(c: Component, data: any, ctx: Context) {
-        const componentData = data[c.KEY];
+        // only operate if the trigger passes or the KEY exists on the data
+        if (c.trigger?.(data, ctx) || c.KEY in data) {
+            const cData = data[c.KEY];
 
-        // only operate if this component exists on the entity data
-        if (componentData !== undefined) {
             // check that the parent entity contains all of the other components required by this component
             c.REQUIRES?.forEach((r) => {
                 if (data[r] === undefined)
@@ -74,14 +74,12 @@ export namespace Component {
 
             // If the data is an array, make an array of components
             // used for stuff like `categories` and `properties`
-            if (Array.isArray(componentData)) {
-                ctx.parent[c.KEY] = componentData.map((d: any) =>
-                    c.process ? c.process(d, ctx) : d
+            if (Array.isArray(cData)) {
+                ctx.parent[c.KEY] = cData.map(
+                    (d: any) => c.process?.(d, ctx) || d
                 );
             } else {
-                ctx.parent[c.KEY] = c.process
-                    ? c.process(componentData, ctx)
-                    : componentData;
+                ctx.parent[c.KEY] = c.process?.(cData, ctx) || cData;
             }
         }
     }
@@ -90,6 +88,7 @@ export namespace Component {
 export interface Component {
     /**
      * The key on the root of an entity that will be interpreted as this component.
+     * Also, the output data is stored at entity.KEY.
      * */
     KEY: string;
 
@@ -98,6 +97,12 @@ export interface Component {
      * If a required component is not present on an entity, this component's valirdator will fail.
      */
     REQUIRES?: string[];
+
+    /**
+     * A function to determine if this component's processing should trigger.
+     * If this function is not included, the default trigger checks if KEY is in the data.
+     */
+    trigger?(data: any, ctx: Component.Context): boolean;
 
     /**
      * A function that is called to process input data before it is entered into the final manifest.
