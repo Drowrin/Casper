@@ -37,8 +37,8 @@ export namespace Category {
 
     export type Map = { [key: string]: Data };
 
-    export function trigger(_: void, ctx: Component.Context) {
-        return ctx.rawData.id.endsWith('*');
+    export function trigger(ctx: Component.Context) {
+        return ctx.data.id.endsWith('*');
     }
 
     export function process(_: void, ctx: Component.Context) {
@@ -61,12 +61,12 @@ Component.register(Category);
 export namespace Categories {
     export const KEY = 'categories';
 
-    export function trigger(_: void, _ctx: Component.Context) {
+    export function trigger(_: Component.Context) {
         return true; // All entities should have categories processed
     }
 
     export function process(_: void, ctx: Component.Context) {
-        let categories = getEntityCategories(ctx.rawData, ctx.categories);
+        let categories = getEntityCategories(ctx.data, ctx.categories);
 
         if (categories.length > 0) return categories;
     }

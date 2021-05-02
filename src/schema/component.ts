@@ -22,7 +22,7 @@ export namespace Component {
         /**
          * The entity data parsed from the source without any processing.
          */
-        rawData: EntityData;
+        data: EntityData;
 
         /**
          * A pre-confiugured markdown converter from Showdownjs.
@@ -55,7 +55,7 @@ export namespace Component {
     /**
      * Get the list of all registered components.
      */
-    export function all() {
+    export function all(): Component[] {
         return list;
     }
 
@@ -64,17 +64,16 @@ export namespace Component {
      * Manifest is used in some contructors so that entities can reference each other.
      * This function does not return anything, it modifies the parent Entity in-place.
      * @param {Component} c The component to be resolved
-     * @param {any} data The raw data of the entity currently being parsed
      * @param {Component.Context} ctx The context of resolving this entity
      */
-    export function resolve(c: Component, data: any, ctx: Context) {
+    export function resolve(c: Component, ctx: Context) {
         // only operate if the trigger passes or the KEY exists on the data
-        if (c.trigger?.(data, ctx) || c.KEY in data) {
-            const cData = data[c.KEY];
+        if (c.trigger?.(ctx) || c.KEY in ctx.data) {
+            const cData = (<any>ctx.data)[c.KEY];
 
             // check that the parent entity contains all of the other components required by this component
             c.REQUIRES?.forEach((r) => {
-                if (data[r] === undefined)
+                if ((<any>ctx.data)[r] === undefined)
                     throw `${ctx.parent.id} does not contain "${r}", which is a requirement for "${c.KEY}"`;
             });
 
@@ -101,7 +100,7 @@ export interface Component {
      * A function to determine if this component's processing should trigger.
      * If this function is not included, the default trigger checks if KEY is in the data.
      */
-    trigger?(data: any, ctx: Component.Context): boolean;
+    trigger?(ctx: Component.Context): boolean;
 
     /**
      * A function that is called to process input data before it is entered into the final manifest.

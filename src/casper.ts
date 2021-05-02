@@ -5,11 +5,8 @@ import hash = require('object-hash');
 import Fuse from 'fuse.js';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { Entity, EntityData, Manifest } from './schema';
+import { Entity, EntityData, Manifest, resolveEntities } from './schema';
 import { exit } from 'process';
-import { Converter } from 'showdown';
-import { casperMarkdown } from './markdown';
-import { Category } from './schema/category';
 
 /**
  * Load all YAML files in a directory recursively.
@@ -113,69 +110,6 @@ function loadFiles(...mainDataDirs: string[]): EntityData[] {
     return out;
 }
 
-type EntityMap = { [key: string]: Entity };
-
-/**
- * Gets all entities that are considered categories and renders them with markdown.
- */
-export function getAllCategories(m: Manifest, c: Converter): Category.Map {
-    return Object.entries(m)
-        .filter(([k, _]) => k.endsWith('*'))
-        .reduce((o, [k, v]) => {
-            if (v.description === undefined)
-                throw `${v.id} does not contain "description", which is a requirement to be a category`;
-            return {
-                ...o,
-                [k.slice(0, -1)]: {
-                    name: v.name,
-                    id: v.id,
-                    description: {
-                        raw: v.description,
-                        rendered: c.makeHtml(v.description),
-                    },
-                },
-            };
-        }, {});
-}
-
-/**
- * Take raw data and resolve into Entity objects.
- */
-function resolveEntities(ent: EntityData[]): EntityMap {
-    // Initial validation of data. Sort into id -> entity map so that entities can reference each other while resolving
-    var d: { [key: string]: EntityData } = {};
-    for (var e of ent) {
-        if (e.id in d) throw `Duplicate id ${e.id}\n${e.name}\n${d[e.id].name}`;
-
-        d[e.id] = e;
-    }
-
-    let converter = new Converter({
-        extensions: [casperMarkdown(d)],
-
-        ghCompatibleHeaderId: true,
-        simplifiedAutoLink: true,
-        excludeTrailingPunctuationFromURLs: true,
-        literalMidWordUnderscores: true,
-        strikethrough: true,
-        tables: true,
-        tablesHeaderId: true,
-        tasklists: true,
-        disableForced4SpacesIndentedSublists: true,
-    });
-
-    const cats = getAllCategories(d, converter);
-
-    // resolve raw entity data into full Entity objects.
-    // the Entity constructor does a lot. It recursively resolves and validates each component of this entity.
-    var out: { [key: string]: Entity } = {};
-    for (var key in d) {
-        out[key] = new Entity(d[key], d, cats, converter);
-    }
-
-    return out;
-}
-
 /**
  * Used by Fuse.js to generate a search index.
  * See examples for more information: https://fusejs.io/examples.html
@@ -204,7 +138,7 @@ const fuseKeys = [
  * Serialized to JSON before being sent to clients.
  */
 export class Casper {
-    manifest: EntityMap;
+    manifest: { [key: string]: Entity };
     length: number;
     index: Fuse.FuseIndex<Entity>;
     hash: string;
