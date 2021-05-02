@@ -49,7 +49,7 @@ export interface CategoryData {
     description: { raw: string; rendered: string };
 }
 
-type CategoryMap = { [key: string]: CategoryData };
+export type CategoryMap = { [key: string]: CategoryData };
 
 /**
  * Gets all entities that are considered categories and renders them with markdown.
@@ -101,11 +101,7 @@ function getEntityCategories(data: EntityData, cats: CategoryMap) {
 /**
  * Determine if this entity is a category, and if so, put a list of all its members at entity.entities.
  */
-function resolveCategory(
-    entity: Entity,
-    m: Manifest,
-    cats: { [key: string]: CategoryData }
-) {
+function resolveCategory(entity: Entity, m: Manifest, cats: CategoryMap) {
     if (entity.id.endsWith('*')) {
         entity.entities = [];
 
@@ -139,22 +135,29 @@ export class Entity {
     constructor(
         data: EntityData,
         manifest: Manifest,
-        cats: CategoryMap,
-        converter: Converter
+        categories: CategoryMap,
+        markdown: Converter
     ) {
         this.name = data.name;
         this.id = data.id;
 
         // TODO: convert these category methods to more standard components?
-        let entityCats = getEntityCategories(data, cats);
+        let entityCats = getEntityCategories(data, categories);
         if (entityCats.length > 0) this.categories = entityCats;
 
-        resolveCategory(this, manifest, cats);
+        resolveCategory(this, manifest, categories);
+
+        const ctx: Component.Context = {
+            manifest,
+            categories,
+            markdown,
+            parent: this,
+        };
 
         // Check all possible components against the entity data.
         // If a component key matches, the constructed component is added to this Entity.
         for (const comp of Component.all()) {
-            Component.resolve(comp, data, this, manifest, converter);
+            Component.resolve(comp, data, ctx);
         }
     }
 }

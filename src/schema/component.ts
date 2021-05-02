@@ -1,5 +1,5 @@
 import { Converter } from 'showdown';
-import { Entity } from '.';
+import { CategoryMap, Entity } from '.';
 import { Manifest } from '../schema';
 
 export namespace Component {
@@ -23,6 +23,11 @@ export namespace Component {
          * Most common usage would be `markdown.makeHtml(string)`.
          */
         markdown: Converter;
+
+        /**
+         * All valid categories. A map from string ids to CategoryData.
+         */
+        categories: CategoryMap;
     }
 
     /**
@@ -54,40 +59,27 @@ export namespace Component {
      * This function does not return anything, it modifies the parent Entity in-place.
      * @param {Component} c The component to be resolved
      * @param {any} data The raw data of the entity currently being parsed
-     * @param {Entity} parent The in-progress state of the output entity
-     * @param {Manifest} manifest The initial manifest parsed from the source yaml
-     * @param {Converter} markdown A pre-confiugured markdown converter from Showdownjs
+     * @param {Component.Context} ctx The context of resolving this entity
      */
-    export function resolve(
-        c: Component,
-        data: any,
-        parent: Entity,
-        manifest: Manifest,
-        markdown: Converter
-    ) {
+    export function resolve(c: Component, data: any, ctx: Context) {
         const componentData = data[c.KEY];
-        const ctx: Component.Context = {
-            parent,
-            manifest,
-            markdown,
-        };
 
         // only operate if this component exists on the entity data
         if (componentData !== undefined) {
             // check that the parent entity contains all of the other components required by this component
             c.REQUIRES?.forEach((r) => {
                 if (data[r] === undefined)
-                    throw `${parent.id} does not contain "${r}", which is a requirement for "${c.KEY}"`;
+                    throw `${ctx.parent.id} does not contain "${r}", which is a requirement for "${c.KEY}"`;
             });
 
             // If the data is an array, make an array of components
             // used for stuff like `categories` and `properties`
             if (Array.isArray(componentData)) {
-                parent[c.KEY] = componentData.map((d: any) =>
+                ctx.parent[c.KEY] = componentData.map((d: any) =>
                     c.process ? c.process(d, ctx) : d
                 );
             } else {
-                parent[c.KEY] = c.process
+                ctx.parent[c.KEY] = c.process
                     ? c.process(componentData, ctx)
                     : componentData;
             }
