@@ -131,6 +131,9 @@ export interface CategoryData {
 
 type CategoryMap = { [key: string]: CategoryData };
 
+/**
+ * Gets all entities that are considered categories and renders them with markdown.
+ */
 export function getAllCategories(m: Manifest, c: Converter): CategoryMap {
     return Object.entries(m)
         .filter(([k, _]) => k.endsWith('*'))
@@ -151,6 +154,9 @@ export function getAllCategories(m: Manifest, c: Converter): CategoryMap {
         }, {});
 }
 
+/**
+ * Get a list of all the categories this entity belongs to.
+ */
 function getEntityCategories(data: EntityData, cats: CategoryMap) {
     let out = [];
 
@@ -172,21 +178,20 @@ function getEntityCategories(data: EntityData, cats: CategoryMap) {
     return <CategoryData[]>out;
 }
 
+/**
+ * Determine if this entity is a category, and if so, put a list of all its members at entity.entities.
+ */
 function resolveCategory(
-    ed: EntityData,
     entity: Entity,
     m: Manifest,
     cats: { [key: string]: CategoryData }
 ) {
-    if (ed.id.endsWith('*')) {
+    if (entity.id.endsWith('*')) {
         entity.entities = [];
 
         for (const [k, v] of Object.entries(m)) {
-            if (
-                getEntityCategories(v, cats)
-                    .map((e) => e.id)
-                    .includes(ed.id)
-            ) {
+            let entityCatIDs = getEntityCategories(v, cats).map((e) => e.id);
+            if (entityCatIDs.includes(entity.id)) {
                 entity.entities.push(k);
             }
         }
@@ -213,20 +218,21 @@ export class Entity {
 
     constructor(
         data: EntityData,
-        m: Manifest,
+        manifest: Manifest,
         cats: CategoryMap,
-        c: Converter
+        converter: Converter
     ) {
         this.name = data.name;
         this.id = data.id;
 
+        // TODO: convert these category methods to more standard components?
         this.categories = getEntityCategories(data, cats);
-        resolveCategory(data, this, m, cats);
+        resolveCategory(this, manifest, cats);
 
         // Check all possible components against the entity data.
         // If a component key matches, the constructed component is added to this Entity.
         for (const comp of Component.all()) {
-            Component.resolve(comp, data, this, m, c);
+            Component.resolve(comp, data, this, manifest, converter);
         }
     }
 }
