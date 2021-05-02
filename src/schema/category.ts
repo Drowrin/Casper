@@ -1,29 +1,4 @@
 import { Component } from '../component';
-import { EntityData } from '.';
-
-/**
- * Get a list of all the categories this entity belongs to.
- */
-function getEntityCategories(data: EntityData, cats: Category.Map) {
-    let out = [];
-
-    for (const [k, v] of Object.entries(cats)) {
-        if (data.id.startsWith(k) && data.id != `${k}*`) {
-            out.push(v);
-        }
-    }
-
-    data.categories?.forEach((e) => {
-        const cat = cats[`${e}.`];
-
-        if (cat === undefined)
-            throw `${data.id} contains an undefined reference: "${e}"`;
-
-        out.push(cat);
-    });
-
-    return <Category.Data[]>out;
-}
 
 export namespace Category {
     export const KEY = 'entities';
@@ -38,22 +13,18 @@ export namespace Category {
     export type Map = { [key: string]: Data };
 
     export function trigger(ctx: Component.Context) {
-        return ctx.id.endsWith('*');
-    }
+        if (ctx.id.endsWith('*')) {
+            if (ctx.data.description === undefined)
+                throw `${ctx.id} does not contain "description", which is a requirement to be a category`;
 
-    export function process(_: void, ctx: Component.Context) {
-        let entities = [];
-
-        for (const [k, v] of Object.entries(ctx.entities)) {
-            let entityCatIDs = getEntityCategories(v, ctx.categories).map(
-                (e) => e.id
-            );
-            if (entityCatIDs.includes(ctx.id)) {
-                entities.push(k);
-            }
+            return true;
         }
 
-        return entities;
+        return false;
+    }
+
+    export function getData(_: Component.Context) {
+        return []; // placeholder, set by Categories below
     }
 }
 Component.register(Category);
@@ -66,10 +37,46 @@ export namespace Categories {
         return true; // All entities should have categories processed
     }
 
-    export function process(_: void, ctx: Component.Context) {
-        let categories = getEntityCategories(ctx.data, ctx.categories);
+    export function process(
+        data: string[] | undefined,
+        ctx: Component.Context
+    ) {
+        let cats = ctx.passed['entities'];
 
-        if (categories.length > 0) return categories;
+        let out = [];
+
+        for (const k of cats) {
+            let category_id = k.slice(0, -1);
+            if (ctx.id.startsWith(category_id) && ctx.id != k) {
+                out.push(k);
+            }
+        }
+
+        if (data !== undefined) {
+            for (const r of data) {
+                let ref = `${r}.*`;
+
+                if (!ctx.passed['entities'].includes(ref))
+                    throw `${ctx.id} contains an undefined category reference: "${r}"`;
+
+                if (out.includes(ref))
+                    throw `${ctx.id} contains a duplicate category reference: "${r}"`;
+
+                out.push(ref);
+            }
+        }
+
+        return out.map((id) => {
+            let category = ctx.manifest[id];
+
+            category.entities.push(ctx.id);
+
+            return {
+                id,
+                name: category.name,
+                description: category.description,
+            };
+        });
     }
 }
 Component.register(Categories);

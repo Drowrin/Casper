@@ -17,6 +17,12 @@ export namespace Component {
         manifest: Manifest;
 
         /**
+         * A map of string KEYs to string ID arrays.
+         * The id of every entity that passes a component's trigger so far is put in the ID array under that component's KEY.
+         */
+        passed: { [key: string]: string[] };
+
+        /**
          * The current entity being processed.
          * This is partial/in-progress data, not the source data.
          * This is the state of the entity directly before this component is added to it.
@@ -39,11 +45,6 @@ export namespace Component {
          * Most common usage would be `markdown.makeHtml(string)`.
          */
         markdown: Converter;
-
-        /**
-         * All valid categories. A map from string ids to CategoryData.
-         */
-        categories: Category.Map;
     }
 
     /**
@@ -129,6 +130,9 @@ export namespace Component {
 
         // only operate if the trigger passes
         if (trigger(ctx)) {
+            // Mark that this entity passed the trigger
+            ctx.passed[c.KEY].push(ctx.id);
+
             // get component-specific data from the entity data
             const cData = getData(ctx);
 

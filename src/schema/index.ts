@@ -18,7 +18,6 @@ import './vehicle';
 import './weapon';
 
 import { Component } from '../component';
-import { Category } from './category';
 import { casperMarkdown } from '../markdown';
 
 export interface EntityData {}
@@ -37,29 +36,6 @@ export interface Entity {
  */
 export interface Manifest {
     [key: string]: Entity;
-}
-
-/**
- * Gets all entities that are considered categories and renders them with markdown.
- */
-export function getAllCategories(m: EntityMap, c: Converter): Category.Map {
-    return Object.entries(m)
-        .filter(([k, _]) => k.endsWith('*'))
-        .reduce((o, [k, v]) => {
-            if (v.description === undefined)
-                throw `${v.id} does not contain "description", which is a requirement to be a category`;
-            return {
-                ...o,
-                [k.slice(0, -1)]: {
-                    name: v.name,
-                    id: v.id,
-                    description: {
-                        raw: v.description,
-                        rendered: c.makeHtml(v.description),
-                    },
-                },
-            };
-        }, {});
 }
 
 /**
@@ -88,7 +64,7 @@ export function resolveEntities(ent: EntityData[]): Manifest {
         disableForced4SpacesIndentedSublists: true,
     });
 
-    const cats = getAllCategories(d, converter);
+    // const cats = getAllCategories(d, converter);
 
     // the initial state of the output manifest before entities are resolved
     var out: { [key: string]: Entity } = {};
@@ -96,17 +72,21 @@ export function resolveEntities(ent: EntityData[]): Manifest {
         out[key] = {};
     }
 
+    let passed: { [key: string]: string[] } = {};
+
     // resolve components in order
     for (const comp of Component.all()) {
+        passed[comp.KEY] = [];
+
         for (var [k, v] of Object.entries(out)) {
             let ctx: Component.Context = {
                 id: k,
                 entities: d,
                 manifest: out,
+                passed,
                 parent: v,
                 data: d[k],
                 markdown: converter,
-                categories: cats,
             };
 
             Component.resolve(comp, ctx);
