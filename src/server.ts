@@ -18,19 +18,19 @@ app.get('/', (req, res) => {
 });
 
 /**
- * This endpoint returns a particular entity.
- * Mostly used for debugging.
- */
-app.get('/entity/:id', (req, res) => {
-    res.json(casper.get(req.params.id));
-});
-
-/**
  * Dedicated endpoint for the casper version hash.
  * Returns nothing else so that the client can compare hashes as quickly as possible.
  */
 app.get('/hash', (req, res) => {
     res.send(casper.hash);
+});
+
+/**
+ * This endpoint returns a particular entity.
+ * Mostly used for debugging.
+ */
+app.get('/:id', (req, res) => {
+    res.json(casper.get(req.params.id));
 });
 
 // Start the app and wait for requests.
