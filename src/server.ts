@@ -1,6 +1,6 @@
 import express = require('express');
 import cors = require('cors');
-import { Casper } from '../casper';
+import { Casper } from './casper';
 
 // Load, validate, and resolve entities
 // If there are issues loading the data, the app will display errors and close here.

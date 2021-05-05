@@ -8,7 +8,7 @@
         "build-typescript": "tsc",
         "prettier": "prettier --write .",
         "build": "run-s prettier build-typescript build-validator",
-        "start": "node ./build/server/index.js",
+        "start": "node ./build/server.js",
         "casper": "node ./build/casper.js",
         "dev": "run-s build start"
     },
