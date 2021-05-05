@@ -34,9 +34,7 @@ export interface Entity {
 /**
  * The output data, a map of Entities.
  */
-export interface Manifest {
-    [key: string]: Entity;
-}
+export type Manifest = { [key: string]: Entity };
 
 /**
  * Take raw data and resolve into Entity objects.
@@ -67,7 +65,7 @@ export function resolveEntities(ent: EntityData[]): Manifest {
     // const cats = getAllCategories(d, converter);
 
     // the initial state of the output manifest before entities are resolved
-    var out: { [key: string]: Entity } = {};
+    var out: Manifest = {};
     for (var key in d) {
         out[key] = {};
     }

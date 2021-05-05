@@ -4,7 +4,7 @@ import { Casper } from './casper';
 
 // Load, validate, and resolve entities
 // If there are issues loading the data, the app will display errors and close here.
-const casper = new Casper('./data');
+const casper = Casper.parse('./data', { index: true });
 
 // Prepare the express application, allowing CORS.
 const app = express();
@@ -14,7 +14,7 @@ app.use(cors());
  * Main data endpoint. This returns the whole entity manifest.
  */
 app.get('/', (req, res) => {
-    res.json(casper);
+    res.json(casper.serialize());
 });
 
 /**
