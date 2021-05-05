@@ -28,10 +28,22 @@ const defaultFuseKeys = [
 ];
 
 export interface CasperOptions {
+    /**
+     * Can be either a boolean or a pre-generated FuseIndex.
+     * If it is a boolean and is `true`, a FuseIndex will be generated during Casper construction.
+     * If it is a pre-generated FuseIndex, it will be saved directly into the Casper instance.
+     */
     index?: Fuse.FuseIndex<Entity> | boolean;
 
+    /**
+     * If index is set to `true`, these keys will be used when generating the index.
+     * This is optional. If it is not provided, default keys will be used.
+     */
     indexKeys?: Fuse.FuseOptionKey[];
 
+    /**
+     * If this is present, the manifest will not be hashed during Casper construction and this value will be used instead.
+     */
     overrideHash?: string;
 }
 
