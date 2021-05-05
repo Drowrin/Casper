@@ -14,7 +14,7 @@ app.use(cors());
  * Main data endpoint. This returns the whole entity manifest.
  */
 app.get('/', (req, res) => {
-    res.json(casper.serialize());
+    res.json(casper.json());
 });
 
 /**
