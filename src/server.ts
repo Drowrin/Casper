@@ -1,10 +1,11 @@
 import express = require('express');
 import cors = require('cors');
 import { Casper } from './casper';
+import { Config } from './config';
 
 // Load, validate, and resolve entities
 // If there are issues loading the data, the app will display errors and close here.
-const casper = Casper.parse('./data', { index: true });
+const casper = Casper.parse(Config.dataDirs, { index: true });
 
 // Prepare the express application, allowing CORS.
 const app = express();
@@ -34,5 +35,5 @@ app.get('/:id', (req, res) => {
 });
 
 // Start the app and wait for requests.
-app.listen(3001);
+app.listen(Config.port);
 console.log('Express started on port 3001');
