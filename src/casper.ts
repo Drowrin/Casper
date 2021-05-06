@@ -2,7 +2,7 @@ import hash = require('object-hash');
 import Fuse from 'fuse.js';
 
 import { Entity } from './schema';
-import { parseFiles } from './parser';
+import { Parser } from './parser';
 import { Config } from './config';
 
 /**
@@ -61,10 +61,8 @@ export class Casper {
     /**
      * Parse everything in dataDirs and create a new Casper instance from the data.
      */
-    static parse(dataDirs: string[] | string, options?: CasperOptions): Casper {
-        let dirs = typeof dataDirs === 'string' ? [dataDirs] : dataDirs;
-
-        let parsed = parseFiles(dirs);
+    static parse(parser: Parser, options?: CasperOptions): Casper {
+        let parsed = parser.parseFiles();
         let manifest = new Map<string, Entity>(Object.entries(parsed));
 
         return new this(manifest, options);
@@ -141,7 +139,9 @@ export class Casper {
 if (require.main === module) {
     var arg = process.argv.slice(2).join('.');
 
-    var casper = Casper.parse(Config.dataDirs);
+    let parser = new Parser(Config.dataDirs);
+
+    var casper = Casper.parse(parser);
 
     console.log(JSON.stringify(casper.get(arg), null, 2));
 }

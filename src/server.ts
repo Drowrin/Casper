@@ -2,10 +2,12 @@ import express = require('express');
 import cors = require('cors');
 import { Casper } from './casper';
 import { Config } from './config';
+import { Parser } from './parser';
 
 // Load, validate, and resolve entities
 // If there are issues loading the data, the app will display errors and close here.
-const casper = Casper.parse(Config.dataDirs, { index: true });
+let parser = new Parser(Config.dataDirs);
+const casper = Casper.parse(parser, { index: true });
 
 // Prepare the express application, allowing CORS.
 const app = express();

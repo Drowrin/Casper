@@ -4,22 +4,35 @@ import yaml = require('js-yaml');
 export interface Config {
     /**
      * The port the server will run at.
+     *
+     * Default: 3001
      */
     port: number;
 
     /**
      * The data directories that will be searched for data.
+     *
+     * Default: [`./data`]
      */
     dataDirs: string[];
+
+    /**
+     * Where parsing error logs should be sent.
+     * Can be either `stderr` or a path.
+     * If it is `stderr`, errors will be logged with `console.error`.
+     * Otherwise, it will be assumed to be a path, and errors will be logged to that file.
+     * Note: This file will be overwritten each time the parser runs.
+     *
+     * Default: `stderr`
+     */
+    errorLogs: string;
 }
 
 export const DefaultConfig: Config = {
     port: 3001,
     dataDirs: ['./data'],
+    errorLogs: 'stderr',
 };
-
-let a: Partial<Config> = {};
-let b: Config = { ...DefaultConfig, ...a };
 
 if (!fs.existsSync('./config.yaml')) {
     console.log("Config doesn't exist, generating default...");

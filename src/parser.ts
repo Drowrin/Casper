@@ -4,80 +4,70 @@ import yaml = require('js-yaml');
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { EntityData, Manifest, resolveEntities } from './schema';
-import { exit } from 'process';
+import { Config } from './config';
 
-/**
- * Load all YAML files in a directory recursively.
- * Each file is validated and references are replaced.
- * Returns a map of ids to entities
- */
-export function parseFiles(mainDataDirs: string[]): Manifest {
-    const schema = JSON.parse(
-        <string>(<any>fs.readFileSync('./build/validator.json'))
-    );
-    const ajv = new Ajv({
-        allowUnionTypes: true,
-        verbose: true,
-    });
-    addFormats(ajv);
+type ErrorMap = { [key: string]: any[] };
 
-    /**
-     * Recurse through directories and gather paths to all yaml files.
-     */
-    function loadFilesInner(dataDir: string): string[] {
-        // read various stats about the file. Used here to determine if a path points to a directory or a file.
-        var stats = fs.lstatSync(dataDir);
+export class Parser {
+    ajv: Ajv;
+    schema: string;
 
-        if (stats.isFile() && dataDir.endsWith('.yml')) {
-            // if the path points to a yaml file, add it to the output
-            return [dataDir];
-        } else if (stats.isDirectory()) {
-            var out: string[] = [];
+    errors: ErrorMap;
+    out: EntityData[];
 
-            // iterate through each file in the current directory
-            for (const file of fs.readdirSync(dataDir)) {
-                if (!file.startsWith('.')) {
-                    // the full path to this particular file
-                    var pathString = path.join(dataDir, file);
-                    out = out.concat(loadFilesInner(pathString));
-                }
-            }
+    dataDirs: string[];
 
-            return out;
-        }
+    constructor(dataDirs: string[]) {
+        this.ajv = new Ajv({
+            allowUnionTypes: true,
+            verbose: true,
+        });
+        addFormats(this.ajv);
 
-        // file didn't match anything we care about, ignore.
-        return [];
+        this.schema = JSON.parse(
+            <string>(<any>fs.readFileSync('./build/validator.json'))
+        );
+
+        this.errors = {};
+        this.out = [];
+
+        this.dataDirs = dataDirs;
     }
 
-    // get a collection of all the yml files in the data directory
-    let allFiles: string[] = [];
-    for (const dataDir of mainDataDirs) {
-        allFiles = allFiles.concat(loadFilesInner(dataDir));
+    error(key: string, err: any) {
+        if (this.errors[key] === undefined) this.errors[key] = [];
+
+        this.errors[key].push(err);
     }
 
-    console.log(`Files loaded: ${allFiles}`);
+    validate(obj: any) {
+        return this.ajv.validate(this.schema, obj);
+    }
 
-    // load all the files into one big array of all raw entities
-    var out: EntityData[] = [];
-    var errors: { [key: string]: any[] } = {};
-    for (const file of allFiles) {
+    getFileEntities(file: string) {
         const entities = <any>yaml.load(<string>(<any>fs.readFileSync(file)));
 
-        if (!Array.isArray(entities))
-            throw `File ${file} not an array of entities`;
+        if (!Array.isArray(entities)) {
+            this.errors[file] = ['not an array of entities'];
+            return;
+        }
 
         for (const entity of entities) {
             if (entity.id === undefined)
-                throw `File ${file} contains an entity without an id: ${JSON.stringify(
-                    entity
-                )}`;
+                this.error(
+                    file,
+                    `contains an entity without an id: ${JSON.stringify(
+                        entity
+                    )}`
+                );
 
-            const valid = ajv.validate(schema, entity);
+            const valid = this.validate(entity);
 
-            if (!valid)
-                errors[entity.id] =
-                    ajv.errors?.map((err) => {
+            if (valid) {
+                this.out.push(entity);
+            } else {
+                this.errors[entity.id] =
+                    this.ajv.errors?.map((err) => {
                         const { keyword, instancePath, message } = err;
 
                         if (
@@ -92,16 +82,85 @@ export function parseFiles(mainDataDirs: string[]): Manifest {
                             message,
                         };
                     }) ?? [];
+            }
+        }
+    }
+
+    findFilesInner(dataDir: string): string[] {
+        // read various stats about the file. Used here to determine if a path points to a directory or a file.
+        var stats = fs.lstatSync(dataDir);
+
+        if (stats.isFile() && dataDir.endsWith('.yml')) {
+            // if the path points to a yaml file, add it to the output
+            return [dataDir];
+        } else if (stats.isDirectory()) {
+            var out: string[] = [];
+
+            // iterate through each file in the current directory
+            for (const file of fs.readdirSync(dataDir)) {
+                if (!file.startsWith('.')) {
+                    // the full path to this particular file
+                    var pathString = path.join(dataDir, file);
+                    out = out.concat(this.findFilesInner(pathString));
+                }
+            }
+
+            return out;
         }
 
-        out = out.concat(<EntityData[]>entities);
+        // file didn't match anything we care about, ignore.
+        return [];
     }
 
-    if (Object.keys(errors).length > 0) {
-        console.log('Data validation failed!');
-        console.log(JSON.stringify(errors, null, 2));
-        exit();
+    /**
+     * Recurse through directories and gather paths to all yaml files.
+     */
+    findFiles(): string[] {
+        // get a collection of all the yml files in the data directory
+        let allFiles: string[] = [];
+        for (const dataDir of this.dataDirs) {
+            allFiles = allFiles.concat(this.findFilesInner(dataDir));
+        }
+
+        return allFiles;
     }
 
-    return resolveEntities(out);
+    /**
+     * Load all YAML files in a directory recursively.
+     * Each file is validated and references are replaced.
+     * Returns a map of ids to entities
+     */
+    parseFiles(): Manifest {
+        this.out = [];
+        this.errors = {};
+
+        let allFiles = this.findFiles();
+
+        console.log(`Files loaded: ${allFiles}`);
+
+        for (const file of allFiles) {
+            this.getFileEntities(file);
+        }
+
+        let errorCount = Object.keys(this.errors).length;
+        if (errorCount > 0) {
+            let prettyErrors = JSON.stringify(this.errors, null, 2);
+
+            if (Config.errorLogs === 'stderr') {
+                console.error(
+                    `\n======ERRORS======\n${prettyErrors}\n==================\n`
+                );
+            } else {
+                try {
+                    fs.writeFileSync(Config.errorLogs, prettyErrors);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            console.error(`Parsing error count: ${errorCount}`);
+        }
+
+        return resolveEntities(this.out);
+    }
 }
