@@ -4,8 +4,11 @@
     "include": ["src/**/*"],
 
     "compilerOptions": {
-        "outDir": "build",
+        "lib": ["esnext"],
+        "target": "esnext",
+
         "experimentalDecorators": true,
-        "target": "es6"
+
+        "outDir": "build"
     }
 }

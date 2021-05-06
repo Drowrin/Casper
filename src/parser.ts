@@ -62,9 +62,7 @@ export function parseFiles(mainDataDirs: string[]): Manifest {
     var out: EntityData[] = [];
     var errors: { [key: string]: any[] } = {};
     for (const file of allFiles) {
-        const entities = <any>(
-            yaml.safeLoad(<string>(<any>fs.readFileSync(file)))
-        );
+        const entities = <any>yaml.load(<string>(<any>fs.readFileSync(file)));
 
         if (!Array.isArray(entities))
             throw `File ${file} not an array of entities`;
@@ -80,17 +78,17 @@ export function parseFiles(mainDataDirs: string[]): Manifest {
             if (!valid)
                 errors[entity.id] =
                     ajv.errors?.map((err) => {
-                        const { keyword, dataPath, message } = err;
+                        const { keyword, instancePath, message } = err;
 
                         if (
                             keyword === 'additionalProperties' &&
-                            dataPath === ''
+                            instancePath === ''
                         )
                             return 'Unrecognized component!';
 
                         return {
                             keyword,
-                            dataPath,
+                            instancePath,
                             message,
                         };
                     }) ?? [];

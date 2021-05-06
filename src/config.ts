@@ -28,7 +28,7 @@ if (!fs.existsSync('./config.yaml')) {
 
 export const Config: Config = {
     ...DefaultConfig,
-    ...(<Config>yaml.safeLoad(<string>(<any>fs.readFileSync('./config.yaml')))),
+    ...(<Config>yaml.load(<string>(<any>fs.readFileSync('./config.yaml')))),
 };
 
 console.log(
