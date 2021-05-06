@@ -22,7 +22,30 @@ To build and then run the dev build
 
 `npm run dev`
 
-Data may be viewed at `localhost:3001`. In the future, this will be configurable for dev builds. [balthasar](https://github.com/Drowrin/balthasar) provides a frontend for the data.
+Data may be viewed at `localhost:3001`. The port and data directory can be configured in config.yaml (generated on first run). [balthasar](https://github.com/Drowrin/balthasar) provides a frontend for the data.
+
+## Docker
+
+A Dockerfile is included for easy deployment and for a reproducible environment.
+
+To build a docker image
+
+`docker build -t casper .`
+
+To run the generated image
+
+`docker run -p 3001:3001 -v path/to/data:/casper/data casper`
+
+or with docker-compose
+
+```
+casper:
+  image: casper
+  volumes:
+    - path/to/data:/casper/data
+  ports:
+    - 3001:3001
+```
 
 ## Command Line Interface
 

@@ -1,0 +1,12 @@
+node_modules
+data
+build
+package-lock.json
+config.yaml
+
+.git
+.gitignore
+
+README.md
+LICENSE
+Dockerfile
