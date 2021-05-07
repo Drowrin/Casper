@@ -1,13 +1,27 @@
 import express = require('express');
 import cors = require('cors');
-import { Casper } from './casper';
+import fs = require('fs');
+import { Casper, CasperOptions } from './casper';
 import { Config } from './config';
 import { Parser } from './parser';
 
-// Load, validate, and resolve entities
-// If there are issues loading the data, the app will display errors and close here.
+const casperOptions: CasperOptions = { index: true };
+
 let parser = new Parser(Config.dataDirs);
-const casper = Casper.parse(parser, { index: true });
+let casper = Casper.parse(parser, casperOptions);
+
+let lastChange: { [key: string]: number } = {};
+let changeThreshold = 1000;
+
+Config.dataDirs.forEach((d) => {
+    fs.watch(d, (_, filename) => {
+        if (Date.now() - (lastChange[filename] || 0) > changeThreshold) {
+            console.log(`\nChange detected in ${filename}, reloading casper.`);
+            lastChange[filename] = Date.now();
+            casper = Casper.parse(parser, casperOptions);
+        }
+    });
+});
 
 // Prepare the express application, allowing CORS.
 const app = express();
