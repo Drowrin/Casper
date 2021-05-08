@@ -3,7 +3,6 @@ import Fuse from 'fuse.js';
 
 import { Entity } from './schema';
 import { Parser } from './parser';
-import { Config } from './config';
 
 /**
  * Used by Fuse.js to generate a search index.
@@ -139,7 +138,7 @@ export class Casper {
 if (require.main === module) {
     var arg = process.argv.slice(2).join('.');
 
-    let parser = new Parser(Config.dataDirs);
+    let parser = new Parser();
 
     var casper = Casper.parse(parser);
 

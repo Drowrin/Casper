@@ -7,17 +7,20 @@ import { Parser } from './parser';
 
 const casperOptions: CasperOptions = { index: true };
 
-let parser = new Parser(Config.dataDirs);
+let parser = new Parser();
+parser.findFiles();
+
 let casper = Casper.parse(parser, casperOptions);
 
 let lastChange: { [key: string]: number } = {};
 let changeThreshold = 1000;
 
-Config.dataDirs.forEach((d) => {
+parser.dirs.forEach((d) => {
     fs.watch(d, (_, filename) => {
         if (Date.now() - (lastChange[filename] || 0) > changeThreshold) {
             console.log(`\nChange detected in ${filename}, reloading casper.`);
             lastChange[filename] = Date.now();
+            parser.findFiles();
             casper = Casper.parse(parser, casperOptions);
         }
     });

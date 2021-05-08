@@ -15,9 +15,10 @@ export class Parser {
     errors: ErrorMap;
     out: EntityData[];
 
-    dataDirs: string[];
+    dirs: Set<string>;
+    files: Set<string>;
 
-    constructor(dataDirs: string[]) {
+    constructor() {
         this.ajv = new Ajv({
             allowUnionTypes: true,
             verbose: true,
@@ -31,7 +32,10 @@ export class Parser {
         this.errors = {};
         this.out = [];
 
-        this.dataDirs = dataDirs;
+        this.dirs = new Set();
+        this.files = new Set();
+
+        this.findFiles();
     }
 
     error(key: string, err: any) {
@@ -85,43 +89,35 @@ export class Parser {
         }
     }
 
-    findFilesInner(dataDir: string): string[] {
+    findFilesInner(p: string): void {
         // read various stats about the file. Used here to determine if a path points to a directory or a file.
-        var stats = fs.lstatSync(dataDir);
+        var stats = fs.lstatSync(p);
 
-        if (stats.isFile() && dataDir.endsWith('.yml')) {
+        if (stats.isFile() && p.endsWith('.yml')) {
             // if the path points to a yaml file, add it to the output
-            return [dataDir];
+            this.files.add(p);
         } else if (stats.isDirectory()) {
-            var out: string[] = [];
+            this.dirs.add(p);
 
             // iterate through each file in the current directory
-            for (const file of fs.readdirSync(dataDir)) {
+            for (const file of fs.readdirSync(p)) {
                 if (!file.startsWith('.')) {
                     // the full path to this particular file
-                    var pathString = path.join(dataDir, file);
-                    out = out.concat(this.findFilesInner(pathString));
+                    var pathString = path.join(p, file);
+                    this.findFilesInner(pathString);
                 }
             }
-
-            return out;
         }
-
-        // file didn't match anything we care about, ignore.
-        return [];
     }
 
     /**
      * Recurse through directories and gather paths to all yaml files.
      */
-    findFiles(): string[] {
+    findFiles() {
         // get a collection of all the yml files in the data directory
-        let allFiles: string[] = [];
-        for (const dataDir of this.dataDirs) {
-            allFiles = allFiles.concat(this.findFilesInner(dataDir));
+        for (const dataDir of Config.dataDirs) {
+            this.findFilesInner(dataDir);
         }
-
-        return allFiles;
     }
 
     /**
@@ -133,11 +129,9 @@ export class Parser {
         this.out = [];
         this.errors = {};
 
-        let allFiles = this.findFiles();
+        console.log(`Files loaded: ${Array.from(this.files)}`);
 
-        console.log(`Files loaded: ${allFiles}`);
-
-        for (const file of allFiles) {
+        for (const file of this.files) {
             this.getFileEntities(file);
         }
 
