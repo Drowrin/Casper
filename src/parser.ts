@@ -5,6 +5,7 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { EntityData, Manifest, resolveEntities } from './schema';
 import { Config } from './config';
+import { Casper, CasperOptions } from './casper';
 
 type ErrorMap = { [key: string]: any[] };
 
@@ -155,5 +156,12 @@ export class Parser {
         }
 
         return resolveEntities(this.out);
+    }
+
+    /**
+     * Parse everything in dataDirs and create a new Casper instance from the data.
+     */
+    makeCasper(options?: CasperOptions): Casper {
+        return new Casper(this.parseFiles(), options);
     }
 }

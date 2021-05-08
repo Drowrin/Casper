@@ -10,7 +10,7 @@
         "build-typescript": "tsc",
         "build": "npm-run-all prettier build-typescript build-validator",
         "start": "node ./build/server.js",
-        "casper": "node ./build/casper.js",
+        "casper": "node ./build/cli.js",
         "dev": "npm-run-all clean build start"
     },
     "author": "Jordan Bates <drowrin@gmail.com>",

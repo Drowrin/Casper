@@ -1,7 +1,7 @@
 import express = require('express');
 import cors = require('cors');
 import fs = require('fs');
-import { Casper, CasperOptions } from './casper';
+import { CasperOptions } from './casper';
 import { Config } from './config';
 import { Parser } from './parser';
 
@@ -10,7 +10,7 @@ const casperOptions: CasperOptions = { index: true };
 let parser = new Parser();
 parser.findFiles();
 
-let casper = Casper.parse(parser, casperOptions);
+let casper = parser.makeCasper(casperOptions);
 
 let lastChange: { [key: string]: number } = {};
 let changeThreshold = 1000;
@@ -21,7 +21,7 @@ parser.dirs.forEach((d) => {
             console.log(`\nChange detected in ${filename}, reloading casper.`);
             lastChange[filename] = Date.now();
             parser.findFiles();
-            casper = Casper.parse(parser, casperOptions);
+            casper = parser.makeCasper(casperOptions);
         }
     });
 });

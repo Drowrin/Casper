@@ -2,7 +2,6 @@ import hash = require('object-hash');
 import Fuse from 'fuse.js';
 
 import { Entity, Manifest } from './schema';
-import { Parser } from './parser';
 
 /**
  * Used by Fuse.js to generate a search index.
@@ -69,13 +68,6 @@ export class Casper {
 
     index?: Fuse.FuseIndex<Entity>;
     fuse?: Fuse<Entity>;
-
-    /**
-     * Parse everything in dataDirs and create a new Casper instance from the data.
-     */
-    static parse(parser: Parser, options?: CasperOptions): Casper {
-        return new this(parser.parseFiles(), options);
-    }
 
     /**
      * Create a Casper instance from pre-processed JSON data.
@@ -158,18 +150,4 @@ export class Casper {
             index: this.index,
         };
     }
-}
-
-// commandline interface for casper, rather than running a server
-// args are transformed into an id, and then the result of an id lookup is printed to the console.
-// used for debugging data changes
-// example: `npm run casper weapon longsword`
-if (require.main === module) {
-    var arg = process.argv.slice(2).join('.');
-
-    let parser = new Parser();
-
-    var casper = Casper.parse(parser);
-
-    console.log(JSON.stringify(casper.get(arg), null, 2));
 }
