@@ -45,11 +45,10 @@ export class Parser {
     }
 
     getFileEntities(file: string) {
-        const entities = <any>yaml.load(<string>(<any>fs.readFileSync(file)));
+        let entities = <any>yaml.load(<string>(<any>fs.readFileSync(file)));
 
         if (!Array.isArray(entities)) {
-            this.errors[file] = ['not an array of entities'];
-            return;
+            entities = [entities];
         }
 
         for (const entity of entities) {
