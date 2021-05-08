@@ -146,7 +146,7 @@ export class Casper {
     json() {
         return {
             manifest: Object.fromEntries(this.manifest),
-            hash: this.manifest,
+            hash: this.hash,
             index: this.index,
         };
     }
