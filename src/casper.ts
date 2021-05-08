@@ -1,7 +1,7 @@
 import hash = require('object-hash');
 import Fuse from 'fuse.js';
 
-import { Entity } from './schema';
+import { Entity, Manifest } from './schema';
 import { Parser } from './parser';
 
 /**
@@ -27,6 +27,13 @@ const defaultFuseKeys = [
     },
 ];
 
+const defaultFuseOptions: Fuse.IFuseOptions<Entity> = {
+    threshold: 0.55,
+    includeMatches: true,
+    includeScore: true,
+    useExtendedSearch: true,
+};
+
 export interface CasperOptions {
     /**
      * Can be either a boolean or a pre-generated FuseIndex.
@@ -45,6 +52,11 @@ export interface CasperOptions {
      * If this is present, the manifest will not be hashed during Casper construction and this value will be used instead.
      */
     overrideHash?: string;
+
+    /**
+     * Override default search options for Fuse.js
+     */
+    searchOptions?: Fuse.IFuseOptions<Entity>;
 }
 
 /**
@@ -56,15 +68,13 @@ export class Casper {
     hash: string;
 
     index?: Fuse.FuseIndex<Entity>;
+    fuse?: Fuse<Entity>;
 
     /**
      * Parse everything in dataDirs and create a new Casper instance from the data.
      */
     static parse(parser: Parser, options?: CasperOptions): Casper {
-        let parsed = parser.parseFiles();
-        let manifest = new Map<string, Entity>(Object.entries(parsed));
-
-        return new this(manifest, options);
+        return new this(parser.parseFiles(), options);
     }
 
     /**
@@ -84,22 +94,31 @@ export class Casper {
 
         if (c.index !== undefined && !options.index) options.index = c.index;
 
-        let manifest = new Map<string, Entity>(Object.entries(c.manifest));
-
-        return new this(manifest, options);
+        return new this(c.manifest, options);
     }
 
-    constructor(manifest: Map<string, Entity>, options: CasperOptions = {}) {
-        this.manifest = manifest;
+    constructor(manifest: Manifest, options: CasperOptions = {}) {
+        this.manifest = new Map<string, Entity>(Object.entries(manifest));
 
         console.log(`Loaded ${this.manifest.size} entities!`);
 
         if (options.index !== undefined) {
+            let searchOptions = {
+                ...defaultFuseOptions,
+                ...options.searchOptions,
+            };
+
             if (typeof options.index === 'boolean') {
                 if (options.index === true) {
                     this.index = Fuse.createIndex(
                         options.indexKeys || defaultFuseKeys,
                         Object.values(manifest)
+                    );
+
+                    this.fuse = new Fuse(
+                        Object.values(manifest),
+                        searchOptions,
+                        this.index
                     );
                 }
             } else {
@@ -117,6 +136,16 @@ export class Casper {
      */
     get(id: string): Entity | undefined {
         return this.manifest.get(id);
+    }
+
+    /**
+     * Search through the entities in the manifest.
+     * If an index was not generated or passed during construction, this will always return [].
+     */
+    search(term: string) {
+        if (this.fuse === undefined) return [];
+
+        return this.fuse.search(term);
     }
 
     /**
