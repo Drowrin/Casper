@@ -2,7 +2,7 @@
     "name": "casper",
     "version": "0.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "./build/casper.js",
     "scripts": {
         "clean": "rimraf build",
         "prettier": "prettier --write .",
