@@ -69,6 +69,8 @@ export class Casper {
     index?: Fuse.FuseIndex<Entity>;
     fuse?: Fuse<Entity>;
 
+    options: CasperOptions;
+
     /**
      * Create a Casper instance from pre-processed JSON data.
      * Validates the root level only.
@@ -90,6 +92,7 @@ export class Casper {
     }
 
     constructor(manifest: Manifest, options: CasperOptions = {}) {
+        this.options = options;
         this.manifest = new Map<string, Entity>(Object.entries(manifest));
 
         console.log(`Loaded ${this.manifest.size} entities!`);
@@ -99,6 +102,8 @@ export class Casper {
                 ...defaultFuseOptions,
                 ...options.searchOptions,
             };
+
+            this.options.searchOptions = searchOptions;
 
             if (typeof options.index === 'boolean') {
                 if (options.index === true) {
@@ -148,6 +153,7 @@ export class Casper {
             manifest: Object.fromEntries(this.manifest),
             hash: this.hash,
             index: this.index,
+            options: this.options,
         };
     }
 }
