@@ -17,12 +17,14 @@ let changeThreshold = 1000;
 
 parser.dirs.forEach((d) => {
     fs.watch(d, (_, filename) => {
-        if (Date.now() - (lastChange[filename] || 0) > changeThreshold) {
-            console.log(`\nChange detected in ${filename}, reloading casper.`);
-            lastChange[filename] = Date.now();
-            parser.findFiles();
-            casper = parser.makeCasper(casperOptions);
-        }
+        if (!(filename.endsWith('.yml') || filename.endsWith('.yaml'))) return; // only reload if YAML files change
+
+        if (Date.now() - (lastChange[filename] || 0) < changeThreshold) return; // filter out rapid file changes
+
+        console.log(`\nChange detected in ${filename}, reloading casper.`);
+        lastChange[filename] = Date.now();
+        parser.findFiles();
+        casper = parser.makeCasper(casperOptions);
     });
 });
 
