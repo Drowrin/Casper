@@ -4,6 +4,15 @@
 
 The project is currently in very early development. Overall structure is likely to change as the project grows.
 
+## Configuration
+
+When casper is run, it looks for a `config.yaml` file in the root directory. If it can't find one, it generates a default config file.
+
+Currently, the following can be configured:
+- server port
+- directories to scan for data
+- error log behavior
+
 ## Development
 
 To install dependencies
@@ -65,3 +74,4 @@ Multiple args are joined together to form an entity id, which is looked up in th
 -   [object-hash](https://www.npmjs.com/package/object-hash)
 -   [Ajv](https://ajv.js.org/)
 -   [typescript-json-schema](https://github.com/YousefED/typescript-json-schema)
+-   [Showdown](https://github.com/showdownjs/showdown)
