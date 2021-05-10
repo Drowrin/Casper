@@ -1,7 +1,7 @@
 import { Component } from '../component';
 
 export namespace Property {
-    export const KEY = 'propterty';
+    export const KEY = 'property';
 
     export interface Data {
         /**
