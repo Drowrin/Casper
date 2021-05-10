@@ -17,6 +17,7 @@ import './spell';
 import './tool';
 import './vehicle';
 import './weapon';
+import './type';
 
 import { Component } from '../component';
 import { casperMarkdown } from '../markdown';
@@ -112,7 +113,8 @@ export function resolveEntities(ent: EntityData[]): Manifest {
     let passed: { [key: string]: string[] } = {};
 
     // resolve components in order
-    for (const comp of Component.all()) {
+    const components = Component.all();
+    for (const comp of components) {
         passed[comp.KEY] = [];
 
         for (var [k, v] of Object.entries(out)) {
@@ -124,6 +126,7 @@ export function resolveEntities(ent: EntityData[]): Manifest {
                 parent: v,
                 data: d[k],
                 markdown: converter,
+                components,
             };
 
             try {

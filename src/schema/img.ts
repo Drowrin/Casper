@@ -2,6 +2,7 @@ import { Component } from '../component';
 
 export namespace Img {
     export const KEY = 'img';
+    export const SUPPRESS_TYPE = true;
 
     export interface Data {
         /**

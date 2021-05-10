@@ -1,7 +1,7 @@
 import { Component } from '../component';
 
 export namespace Category {
-    export const KEY = 'entities';
+    export const KEY = 'category';
     export const REQUIRES = ['description'];
 
     export interface Data {
@@ -26,12 +26,17 @@ export namespace Category {
     export function getData(_: Component.Context) {
         return []; // placeholder, set by Categories below
     }
+
+    export function transform(processed: any, ctx: Component.Context) {
+        ctx.parent['entities'] = processed;
+    }
 }
 Component.register(Category);
 
 export namespace Categories {
     export const KEY = 'categories';
-    export const WAIT_FOR = ['entities']; // wait for Categories to be processed
+    export const WAIT_FOR = [Category.KEY]; // wait for Categories to be processed
+    export const SUPPRESS_TYPE = true;
 
     export function trigger(_: Component.Context) {
         return true; // All entities should have categories processed
@@ -41,7 +46,7 @@ export namespace Categories {
         data: string[] | undefined,
         ctx: Component.Context
     ) {
-        let cats = ctx.passed['entities'];
+        let cats = ctx.passed[Category.KEY];
 
         let out = [];
 
@@ -56,7 +61,7 @@ export namespace Categories {
             for (const r of data) {
                 let ref = `${r}.*`;
 
-                if (!ctx.passed['entities'].includes(ref))
+                if (!ctx.passed[Category.KEY].includes(ref))
                     throw `${ctx.id} contains an undefined category reference: "${r}"`;
 
                 if (out.includes(ref))

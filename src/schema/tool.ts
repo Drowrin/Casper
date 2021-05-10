@@ -4,6 +4,7 @@ import { Component } from '../component';
 export namespace Tool {
     export const KEY = 'tool';
     export const REQUIRES = ['item', 'proficiency'];
+    export const OPTIONAL = ['activities'];
 
     // TODO: change `supplies` to reference other item entities?
     // TODO: change `skills` to reference and augment skill entities, similar to how Properties work?

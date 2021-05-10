@@ -1,6 +1,5 @@
 import { Converter } from 'showdown';
 import { Entity, EntityData, EntityMap, Manifest } from './schema';
-import { Category } from './schema/category';
 
 export namespace Component {
     export interface Context {
@@ -45,6 +44,11 @@ export namespace Component {
          * Most common usage would be `markdown.makeHtml(string)`.
          */
         markdown: Converter;
+
+        /**
+         * A list of all components, in order of when they are processed.
+         */
+        components: Component[];
     }
 
     /**
@@ -63,14 +67,23 @@ export namespace Component {
         }
     }
 
-    function dependencies(c: Component) {
+    export function dependencies(c: Component) {
         let wait_for = c.WAIT_FOR || [];
         let requires = c.REQUIRES || [];
         let hoists = c.HOIST
-            ? [] // If this is a HOISTed component, do not require other HOISTed components
-            : list.filter((c) => c.HOIST).map((c) => c.KEY);
+            ? // If this component is marked to HOIST, do not require other HOIST components
+              []
+            : // If this component is not marked to HOIST, WAIT_FOR all HOIST components
+              list.filter((c) => c.HOIST).map((c) => c.KEY);
+        let sinks = c.SINK
+            ? // If this component is marked to SINK, WAIT_FOR all non-SINK components
+              list.filter((c) => !c.SINK).map((c) => c.KEY)
+            : // If this component is not marked to SINK, do nothing
+              [];
 
-        return Array.from(new Set([...wait_for, ...requires, ...hoists]));
+        return Array.from(
+            new Set([...wait_for, ...requires, ...hoists, ...sinks])
+        );
     }
 
     /**
@@ -160,14 +173,34 @@ export interface Component {
     /**
      * Array of keys referring to other components that this component requires.
      * If a required component is not present on an entity, this component's valirdator will fail.
+     * Note: This should not be two-way.
+     * Components should have a hierarchy and should not create a dependency cycle.
      */
     REQUIRES?: string[];
 
     /**
+     * Similar to REQUIRES. This marks components that will often accompany this component, but are not required.
+     * This is used to gather hierarchy information for type analysis.
+     */
+    OPTIONAL?: string[];
+
+    /**
+     * Mark if this component should not be considered for type analysis.
+     * For example, a wide-sweeping component like `Categories`, or very basic components like `Description`.
+     */
+    SUPPRESS_TYPE?: boolean;
+
+    /**
      * Hoist to the top of the Topographical sort. The sort will try to keep this element early in the order.
-     * Internally, marks all non-HOIST-ed components to WAIT_FOR this one.
+     * Internally, makes all non-HOIST components WAIT_FOR this one.
      */
     HOIST?: boolean;
+
+    /**
+     * Sink to the bottom of the Topographical sort. The sort will try to keep this element late in the order.
+     * Internally, makes this component WAIT_FOR all non-SINK components.
+     */
+    SINK?: boolean;
 
     /**
      * Array of keys referring to other components that must be processed before this one.
@@ -194,14 +227,6 @@ export interface Component {
     getData?(ctx: Component.Context): any;
 
     /**
-     * A function that transforms the parent entity using the processed data.
-     * If this function is not included, the default behavior is to enter data at parent[KEY].
-     * @param {any} processed The processed data
-     * @param {Component.Context} ctx The context of this processing call. See Component.Context for more info
-     */
-    transform?(processed: any, ctx: Component.Context): void;
-
-    /**
      * A function that is called to process input data before it is entered into the final manifest.
      * This function is optional. If not present, the data will be copied from source as-is.
      * If the function does not return or returns `undefined`, the transform function will not be triggered.
@@ -211,4 +236,12 @@ export interface Component {
      * @returns {any} The processed data that will be output into the final manifest
      */
     process?(data: any, ctx: Component.Context): any;
+
+    /**
+     * A function that transforms the parent entity using the processed data.
+     * If this function is not included, the default behavior is to enter data at parent[KEY].
+     * @param {any} processed The processed data
+     * @param {Component.Context} ctx The context of this processing call. See Component.Context for more info
+     */
+    transform?(processed: any, ctx: Component.Context): void;
 }

@@ -2,6 +2,7 @@ import { Component } from '../component';
 
 export namespace Description {
     export const KEY = 'description';
+    export const SUPPRESS_TYPE = true;
 
     export type Data = string;
 

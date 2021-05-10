@@ -3,6 +3,7 @@ import { Component } from '../component';
 export namespace Weapon {
     export const KEY = 'weapon';
     export const REQUIRES = ['item'];
+    export const OPTIONAL = ['properties'];
 
     export interface Data {
         /**
