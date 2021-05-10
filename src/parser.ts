@@ -3,17 +3,21 @@ import path = require('path');
 import yaml = require('js-yaml');
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { EntityData, Manifest, resolveEntities } from './schema';
+import {
+    clearErrors,
+    EntityData,
+    error,
+    Manifest,
+    reportErrors,
+    resolveEntities,
+} from './schema';
 import { Config } from './config';
 import { Casper, CasperOptions } from './casper';
-
-type ErrorMap = { [key: string]: any[] };
 
 export class Parser {
     ajv: Ajv;
     schema: string;
 
-    errors: ErrorMap;
     out: EntityData[];
 
     dirs: Set<string>;
@@ -30,19 +34,12 @@ export class Parser {
             <string>(<any>fs.readFileSync('./build/validator.json'))
         );
 
-        this.errors = {};
         this.out = [];
 
         this.dirs = new Set();
         this.files = new Set();
 
         this.findFiles();
-    }
-
-    error(key: string, err: any) {
-        if (this.errors[key] === undefined) this.errors[key] = [];
-
-        this.errors[key].push(err);
     }
 
     validate(obj: any) {
@@ -57,20 +54,24 @@ export class Parser {
         }
 
         for (const entity of entities) {
-            if (entity.id === undefined)
-                this.error(
-                    file,
-                    `contains an entity without an id: ${JSON.stringify(
-                        entity
-                    )}`
-                );
+            try {
+                if (entity.id === undefined)
+                    error(
+                        file,
+                        `contains an entity without an id: ${JSON.stringify(
+                            entity
+                        )}`
+                    );
+            } catch (err) {
+                error(file, err);
+            }
 
             const valid = this.validate(entity);
 
             if (valid) {
                 this.out.push(entity);
             } else {
-                this.errors[entity.id] =
+                let err =
                     this.ajv.errors?.map((err) => {
                         const { keyword, instancePath, message } = err;
 
@@ -86,6 +87,8 @@ export class Parser {
                             message,
                         };
                     }) ?? [];
+
+                error(entity.id, err);
             }
         }
     }
@@ -128,7 +131,8 @@ export class Parser {
      */
     parseFiles(): Manifest {
         this.out = [];
-        this.errors = {};
+
+        clearErrors();
 
         console.log(`Files loaded: ${Array.from(this.files)}`);
 
@@ -136,26 +140,11 @@ export class Parser {
             this.getFileEntities(file);
         }
 
-        let errorCount = Object.keys(this.errors).length;
-        if (errorCount > 0) {
-            let prettyErrors = JSON.stringify(this.errors, null, 2);
+        let entities = resolveEntities(this.out);
 
-            if (Config.errorLogs === 'stderr') {
-                console.error(
-                    `\n======ERRORS======\n${prettyErrors}\n==================\n`
-                );
-            } else {
-                try {
-                    fs.writeFileSync(Config.errorLogs, prettyErrors);
-                } catch (err) {
-                    console.error(err);
-                }
-            }
+        reportErrors();
 
-            console.error(`Parsing error count: ${errorCount}`);
-        }
-
-        return resolveEntities(this.out);
+        return entities;
     }
 
     /**

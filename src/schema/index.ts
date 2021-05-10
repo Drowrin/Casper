@@ -1,3 +1,4 @@
+import fs = require('fs');
 import { Converter } from 'showdown';
 
 import './activity';
@@ -19,6 +20,7 @@ import './weapon';
 
 import { Component } from '../component';
 import { casperMarkdown } from '../markdown';
+import { Config } from '../config';
 
 export interface EntityData {}
 
@@ -36,6 +38,41 @@ export interface Entity {
  */
 export type Manifest = { [key: string]: Entity };
 
+export type ErrorMap = { [key: string]: any[] };
+
+let errors: ErrorMap = {};
+
+export function error(key: string, err: any) {
+    if (errors[key] === undefined) errors[key] = [];
+
+    errors[key].push(err);
+}
+
+export function clearErrors() {
+    errors = {};
+}
+
+export function reportErrors() {
+    let errorCount = Object.keys(errors).length;
+    if (errorCount > 0) {
+        let prettyErrors = JSON.stringify(errors, null, 2);
+
+        if (Config.errorLogs === 'stderr') {
+            console.error(
+                `\n======ERRORS======\n${prettyErrors}\n==================\n`
+            );
+        } else {
+            try {
+                fs.writeFileSync(Config.errorLogs, prettyErrors);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        console.error(`Error count: ${errorCount}`);
+    }
+}
+
 /**
  * Take raw data and resolve into Entity objects.
  */
@@ -43,9 +80,11 @@ export function resolveEntities(ent: EntityData[]): Manifest {
     // Initial validation of data. Sort into id -> entity map so that entities can reference each other while resolving
     var d: EntityMap = {};
     for (var e of ent) {
-        if (e.id in d) throw `Duplicate id ${e.id}\n${e.name}\n${d[e.id].name}`;
-
-        d[e.id] = e;
+        if (e.id in d) {
+            error(e.id, `Duplicate id ${e.id}\n${e.name}\n${d[e.id].name}`);
+        } else {
+            d[e.id] = e;
+        }
     }
 
     let converter = new Converter({
@@ -87,7 +126,19 @@ export function resolveEntities(ent: EntityData[]): Manifest {
                 markdown: converter,
             };
 
-            Component.resolve(comp, ctx);
+            try {
+                Component.resolve(comp, ctx);
+            } catch (err) {
+                error(ctx.id, err);
+
+                delete out[ctx.id];
+                delete d[ctx.id];
+
+                for (var k in passed) {
+                    let i = passed[k].indexOf(ctx.id);
+                    if (i > -1) passed[k].splice(i, 1);
+                }
+            }
         }
     }
 
