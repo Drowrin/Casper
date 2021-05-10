@@ -146,14 +146,14 @@ export namespace Component {
             // Mark that this entity passed the trigger
             ctx.passed[c.KEY].push(ctx.id);
 
-            // get component-specific data from the entity data
-            const cData = getData(ctx);
-
             // check that the parent entity contains all of the other components required by this component
             c.REQUIRES?.forEach((r) => {
-                if ((<any>ctx.data)[r] === undefined)
+                if (!ctx.passed[r].includes(ctx.id))
                     throw `${ctx.id} does not contain "${r}", which is a requirement for "${c.KEY}"`;
             });
+
+            // get component-specific data from the entity data
+            const cData = getData(ctx);
 
             let out = process(cData, ctx);
 
