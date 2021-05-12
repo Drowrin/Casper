@@ -134,7 +134,7 @@ export class Parser {
 
         clearErrors();
 
-        console.log(`Files loaded: ${Array.from(this.files)}`);
+        console.log(`Files loaded: ${Array.from(this.files).join(', ')}`);
 
         for (const file of this.files) {
             this.getFileEntities(file);
