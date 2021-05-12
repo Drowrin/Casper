@@ -9,6 +9,7 @@ import './description';
 import './id';
 import './img';
 import './item';
+import './language';
 import './name';
 import './proficiency';
 import './property';
