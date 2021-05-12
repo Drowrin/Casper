@@ -47,7 +47,17 @@ export class Parser {
     }
 
     getFileEntities(file: string) {
-        let entities = <any>yaml.load(<string>(<any>fs.readFileSync(file)));
+        let buffer: Buffer = fs.readFileSync(file);
+
+        if (buffer.length == 0) return;
+
+        let entities;
+        try {
+            entities = <any>yaml.load(buffer.toString());
+        } catch (err) {
+            error(file, err);
+            return;
+        }
 
         if (!Array.isArray(entities)) {
             entities = [entities];
