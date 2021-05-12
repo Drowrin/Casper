@@ -9,9 +9,10 @@ The project is currently in very early development. Overall structure is likely 
 When casper is run, it looks for a `config.yaml` file in the root directory. If it can't find one, it generates a default config file.
 
 Currently, the following can be configured:
-- server port
-- directories to scan for data
-- error log behavior
+
+-   server port
+-   directories to scan for data
+-   error log behavior
 
 ## Development
 
