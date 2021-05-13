@@ -10,15 +10,16 @@ import './id';
 import './img';
 import './item';
 import './language';
+import './lineage';
 import './name';
 import './proficiency';
 import './property';
 import './source';
 import './spell';
 import './tool';
+import './type';
 import './vehicle';
 import './weapon';
-import './type';
 
 import { Component } from '../component';
 import { casperMarkdown } from '../markdown';
