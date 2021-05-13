@@ -108,8 +108,8 @@ export namespace Lineage {
 
     export function procStature(stature: { height: string; weight: string }) {
         return {
-            height: stature.height.split('-').map(parseInt),
-            weight: stature.weight.split('-').map(parseInt),
+            height: stature.height.split('-').map((i) => parseInt(i)),
+            weight: stature.weight.split('-').map((i) => parseInt(i)),
         };
     }
 
