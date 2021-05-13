@@ -150,7 +150,13 @@ export class Casper {
      */
     json() {
         return {
-            manifest: Object.fromEntries(this.manifest),
+            manifest: Object.fromEntries(
+                [...this.manifest].sort(([a, ae], [b, be]) => {
+                    if (a < b) return -1;
+                    if (a > b) return 1;
+                    return 0;
+                })
+            ),
             hash: this.hash,
             index: this.index,
             options: this.options,
