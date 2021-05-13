@@ -133,7 +133,7 @@ export function resolveEntities(ent: EntityData[]): Manifest {
             try {
                 Component.resolve(comp, ctx);
             } catch (err) {
-                error(ctx.id, err);
+                error(ctx.id, err.toString());
 
                 delete out[ctx.id];
                 delete d[ctx.id];
