@@ -41,7 +41,7 @@ export namespace Lineage {
             /**
              * Average height range of the lineage in feet.
              * Should be two numbers separated by a hyphen, for example "4-5".
-             * @pattern ^\d-\d$
+             * @pattern ^\d+-\d+$
              */
             height: string;
 
