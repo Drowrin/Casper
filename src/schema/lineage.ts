@@ -15,6 +15,12 @@ export namespace Trait {
          */
         requirements?: string;
     }
+
+    export function process(data: Data | string) {
+        if (typeof data === 'string') return { type: data };
+
+        return data;
+    }
 }
 Component.register(Trait);
 
@@ -239,6 +245,6 @@ declare module '.' {
         /**
          * If an entity is a trait, it should include this component.
          */
-        trait: Trait.Data;
+        trait: Trait.Data | string;
     }
 }
