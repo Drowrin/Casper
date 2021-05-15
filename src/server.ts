@@ -1,32 +1,43 @@
 import express = require('express');
 import cors = require('cors');
 import fs = require('fs');
-import { CasperOptions } from './casper';
+import { CasperOptions, Casper } from './casper';
 import { Config } from './config';
 import { Parser } from './parser';
 
 const casperOptions: CasperOptions = { index: true };
 
 let parser = new Parser();
-parser.findFiles();
+let casper: Casper;
 
-let casper = parser.makeCasper(casperOptions);
+let lastChange: number = 0;
+let changeThreshold = 500;
 
-let lastChange: { [key: string]: number } = {};
-let changeThreshold = 1000;
+function updateCasper() {
+    lastChange = Date.now();
+    parser.findFiles();
+    casper = parser.makeCasper(casperOptions);
+
+    let taken = Date.now() - lastChange;
+    let files = parser.files.size;
+    let entities = casper.manifest.size;
+    console.log(
+        `Loaded ${files} files containing ${entities} valid entities in ${taken}ms`
+    );
+}
 
 parser.dirs.forEach((d) => {
     fs.watch(d, (_, filename) => {
         if (!(filename.endsWith('.yml') || filename.endsWith('.yaml'))) return; // only reload if YAML files change
 
-        if (Date.now() - (lastChange[filename] || 0) < changeThreshold) return; // filter out rapid file changes
+        if (Date.now() - lastChange < changeThreshold) return; // filter out rapid file changes
 
         console.log(`\nChange detected in ${filename}, reloading casper.`);
-        lastChange[filename] = Date.now();
-        parser.findFiles();
-        casper = parser.makeCasper(casperOptions);
+        updateCasper();
     });
 });
+
+updateCasper();
 
 // Prepare the express application, allowing CORS.
 const app = express();
