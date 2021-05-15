@@ -1,5 +1,6 @@
 import fs = require('fs');
 import { Converter } from 'showdown';
+import yaml from 'js-yaml';
 
 import './activity';
 import './armor';
@@ -48,7 +49,11 @@ let errors: ErrorMap = {};
 export function error(key: string, err: any) {
     if (errors[key] === undefined) errors[key] = [];
 
-    errors[key].push(err);
+    if (Array.isArray(err)) {
+        errors[key] = errors[key].concat(err);
+    } else {
+        errors[key].push(err);
+    }
 }
 
 export function clearErrors() {
@@ -58,11 +63,11 @@ export function clearErrors() {
 export function reportErrors() {
     let errorCount = Object.keys(errors).length;
     if (errorCount > 0) {
-        let prettyErrors = JSON.stringify(errors, null, 2);
+        let prettyErrors = yaml.dump(errors);
 
         if (Config.errorLogs === 'stderr') {
             console.error(
-                `\n======ERRORS======\n${prettyErrors}\n==================\n`
+                `======ERRORS======\n${prettyErrors}==================`
             );
         } else {
             try {

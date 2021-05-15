@@ -95,8 +95,6 @@ export class Casper {
         this.options = options;
         this.manifest = new Map<string, Entity>(Object.entries(manifest));
 
-        console.log(`Loaded ${this.manifest.size} entities!`);
-
         if (options.index !== undefined) {
             let searchOptions = {
                 ...defaultFuseOptions,
@@ -124,8 +122,6 @@ export class Casper {
         }
 
         this.hash = options.overrideHash || hash(this.manifest);
-
-        console.log(`Casper version hash: ${this.hash}`);
     }
 
     /**
