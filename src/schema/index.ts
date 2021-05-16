@@ -49,11 +49,17 @@ let errors: ErrorMap = {};
 export function error(key: string, err: any) {
     if (errors[key] === undefined) errors[key] = [];
 
-    if (Array.isArray(err)) {
-        errors[key] = errors[key].concat(err);
-    } else {
-        errors[key].push(err);
-    }
+    if (!Array.isArray(err)) err = [err];
+
+    err = err.map((e: any) => {
+        if (e instanceof Error) {
+            return e.toString();
+        }
+
+        return e;
+    });
+
+    errors[key] = errors[key].concat(err);
 }
 
 export function clearErrors() {
@@ -61,7 +67,7 @@ export function clearErrors() {
 }
 
 export function reportErrors() {
-    let errorCount = Object.keys(errors).length;
+    let errorCount = Object.values(errors).flat().length;
     if (errorCount > 0) {
         let prettyErrors = yaml.dump(errors);
 

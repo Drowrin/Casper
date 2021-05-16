@@ -42,8 +42,49 @@ export class Parser {
         this.findFiles();
     }
 
-    validate(obj: any) {
-        return this.ajv.validate(this.schema, obj);
+    validate(entity: any, file: string) {
+        if (entity == undefined) return;
+
+        try {
+            if (entity.id === undefined) {
+                error(
+                    file,
+                    `contains an entity without an id: ${JSON.stringify(
+                        entity
+                    )}`
+                );
+                return;
+            }
+        } catch (err) {
+            error(file, err);
+            return;
+        }
+
+        const valid = this.ajv.validate(this.schema, entity);
+
+        if (valid) {
+            this.out.push(entity);
+        } else {
+            let err =
+                this.ajv.errors?.map((err) => {
+                    const { keyword, instancePath, message } = err;
+
+                    if (
+                        keyword === 'additionalProperties' &&
+                        instancePath === ''
+                    )
+                        return 'Unrecognized component!';
+
+                    return {
+                        keyword,
+                        instancePath,
+                        message,
+                    };
+                }) ?? [];
+
+            error(file + ' | ' + entity.id, err);
+            return;
+        }
     }
 
     getFileEntities(file: string) {
@@ -64,42 +105,7 @@ export class Parser {
         }
 
         for (const entity of entities) {
-            try {
-                if (entity.id === undefined)
-                    error(
-                        file,
-                        `contains an entity without an id: ${JSON.stringify(
-                            entity
-                        )}`
-                    );
-            } catch (err) {
-                error(file, err);
-            }
-
-            const valid = this.validate(entity);
-
-            if (valid) {
-                this.out.push(entity);
-            } else {
-                let err =
-                    this.ajv.errors?.map((err) => {
-                        const { keyword, instancePath, message } = err;
-
-                        if (
-                            keyword === 'additionalProperties' &&
-                            instancePath === ''
-                        )
-                            return 'Unrecognized component!';
-
-                        return {
-                            keyword,
-                            instancePath,
-                            message,
-                        };
-                    }) ?? [];
-
-                error(entity.id, err);
-            }
+            this.validate(entity, file);
         }
     }
 
