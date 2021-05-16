@@ -134,6 +134,9 @@ export class Parser {
      * Recurse through directories and gather paths to all yaml files.
      */
     findFiles() {
+        this.dirs = new Set();
+        this.files = new Set();
+
         // get a collection of all the yml files in the data directory
         for (const dataDir of Config.dataDirs) {
             this.findFilesInner(dataDir);
