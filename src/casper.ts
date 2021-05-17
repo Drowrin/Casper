@@ -10,19 +10,7 @@ import { Entity, Manifest } from './schema';
 const defaultFuseKeys = [
     {
         name: 'name',
-        weight: 2,
-    },
-    {
-        name: 'id',
-        weight: 1.5,
-    },
-    {
-        name: 'components.categories.name',
-        weight: 0.5,
-    },
-    {
-        name: 'components.properties.name',
-        weight: 0.5,
+        weight: 1,
     },
 ];
 
@@ -63,6 +51,7 @@ export interface CasperOptions {
  * Serialized to JSON before being sent to clients.
  */
 export class Casper {
+    rawManifest: Entity[];
     manifest: Map<string, Entity>;
     hash: string;
 
@@ -93,7 +82,15 @@ export class Casper {
 
     constructor(manifest: Manifest, options: CasperOptions = {}) {
         this.options = options;
-        this.manifest = new Map<string, Entity>(Object.entries(manifest));
+        this.rawManifest = Object.values(manifest).sort((a, b) => {
+            if (a.id < b.id) return -1;
+            if (a.id > b.id) return 1;
+            return 0;
+        });
+
+        this.manifest = new Map<string, Entity>(
+            this.rawManifest.map((e) => [e.id, e])
+        );
 
         if (options.index !== undefined) {
             let searchOptions = {
@@ -107,7 +104,7 @@ export class Casper {
                 if (options.index === true) {
                     this.index = Fuse.createIndex(
                         options.indexKeys || defaultFuseKeys,
-                        Object.values(manifest)
+                        this.rawManifest
                     );
 
                     this.fuse = new Fuse(
@@ -121,7 +118,7 @@ export class Casper {
             }
         }
 
-        this.hash = options.overrideHash || hash(this.manifest);
+        this.hash = options.overrideHash || hash(this.rawManifest);
     }
 
     /**
@@ -146,13 +143,7 @@ export class Casper {
      */
     json() {
         return {
-            manifest: Object.fromEntries(
-                [...this.manifest].sort(([a, ae], [b, be]) => {
-                    if (a < b) return -1;
-                    if (a > b) return 1;
-                    return 0;
-                })
-            ),
+            manifest: this.rawManifest,
             hash: this.hash,
             index: this.index,
             options: this.options,
