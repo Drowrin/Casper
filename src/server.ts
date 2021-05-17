@@ -66,6 +66,10 @@ app.get('/:id', (req, res) => {
     res.json(casper.get(req.params.id));
 });
 
+app.get('/search/:term', (req, res) => {
+    res.json(casper.search(req.params.term));
+});
+
 // Start the app and wait for requests.
 app.listen(Config.port);
 console.log('Express started on port 3001');
