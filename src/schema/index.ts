@@ -113,6 +113,7 @@ export function resolveEntities(ent: EntityData[]): Manifest {
         tablesHeaderId: true,
         tasklists: true,
         disableForced4SpacesIndentedSublists: true,
+        headerLevelStart: 4,
     });
 
     // const cats = getAllCategories(d, converter);
