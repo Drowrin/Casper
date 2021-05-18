@@ -4,6 +4,8 @@ export namespace Type {
     export const KEY = 'type';
     export const SINK = true;
 
+    export let TYPES: Set<string> = new Set();
+
     export function trigger(_: Component.Context) {
         return true; // trigger on every entity
     }
@@ -39,6 +41,11 @@ export namespace Type {
 
         let types = out.map((c) => c.KEY).join(', ');
         throw `${ctx.id} has multiple valid types! ${types}`;
+    }
+
+    export function transform(processed: any, ctx: Component.Context) {
+        TYPES.add(processed);
+        ctx.parent[KEY] = processed;
     }
 }
 Component.register(Type);

@@ -4,6 +4,7 @@ import fs = require('fs');
 import { CasperOptions, Casper } from './casper';
 import { Config } from './config';
 import { Parser } from './parser';
+import { Type } from './schema/type';
 
 const casperOptions: CasperOptions = { index: true };
 
@@ -24,6 +25,8 @@ function updateCasper() {
     console.log(
         `Loaded ${files} files containing ${entities} valid entities in ${taken}ms`
     );
+
+    console.log(`All types: ${Array.from(Type.TYPES).join(', ')}`);
 }
 
 parser.dirs.forEach((d) => {
