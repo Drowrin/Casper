@@ -8,9 +8,8 @@ export namespace Armor {
     export interface Data {
         /**
          * The AC of this armor.
-         * For example, "+2" or "13 + Dex Modifier (max 2)"
          */
-        ac: string | number;
+        ac: number;
     }
 }
 Component.register(Armor);
