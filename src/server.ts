@@ -26,7 +26,12 @@ function updateCasper() {
         `Loaded ${files} files containing ${entities} valid entities in ${taken}ms`
     );
 
-    console.log(`All types: ${Array.from(Type.TYPES).join(', ')}`);
+    console.log(`All known types: ${Array.from(Type.TYPES).join(', ')}`);
+    console.log(
+        `All known entity keys: ${Array.from(
+            new Set(casper.rawManifest.flatMap((e) => Object.keys(e)))
+        ).join(', ')}`
+    );
 }
 
 parser.dirs.forEach((d) => {
