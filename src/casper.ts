@@ -12,6 +12,10 @@ const defaultFuseKeys = [
         name: 'name',
         weight: 1,
     },
+    {
+        name: 'id',
+        weight: 1,
+    },
 ];
 
 const defaultFuseOptions: Fuse.IFuseOptions<Entity> = {
