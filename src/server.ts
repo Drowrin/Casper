@@ -7,17 +7,38 @@ import { Config } from './config';
 import { Parser } from './parser';
 import { Type } from './schema/type';
 
-// TODO: heartbeat system to test connection occasionally.
-const wss = new WebSocket.Server({ port: Config.wsport });
-let sockets: Array<WebSocket> = [];
+interface HBWebSocket extends WebSocket {
+    isAlive: boolean;
+}
 
-wss.on('connection', function connection(ws) {
-    sockets.push(ws);
-    console.log('Registered new websocket client!');
+const wss = new WebSocket.Server({ port: Config.wsport });
+
+wss.on('connection', function connection(ws: HBWebSocket) {
+    console.log('Registered websocket client');
+
+    ws.isAlive = true;
+    ws.on('pong', function heartbeat() {
+        console.log('pong');
+        (<HBWebSocket>this).isAlive = true;
+    });
+
+    const interval = setInterval(() => {
+        wss.clients.forEach((ws) => {
+            let hbws = <HBWebSocket>ws;
+
+            if (hbws.isAlive === false) {
+                console.log('Connection to a client timed out');
+                return hbws.terminate();
+            }
+
+            hbws.isAlive = false;
+            hbws.ping();
+        });
+    }, 30000);
 
     ws.on('close', function () {
-        console.log('Closing a websocket client!');
-        sockets.splice(sockets.indexOf(ws), 1);
+        console.log('Closing a websocket client');
+        clearInterval(interval);
     });
 });
 
@@ -43,9 +64,12 @@ function updateCasper() {
 
     console.log(`All known types: ${Array.from(Type.TYPES).join(', ')}`);
 
-    sockets.forEach((ws) => ws.send(JSON.stringify({ hash: casper.hash })));
-    if (sockets.length)
-        console.log(`Notified ${sockets.length} clients of updates`);
+    if (wss.clients.size) {
+        wss.clients.forEach((ws) =>
+            ws.send(JSON.stringify({ hash: casper.hash }))
+        );
+        console.log(`Notified ${wss.clients.size} clients of updates`);
+    }
 
     // console.log(
     //     `All known entity keys: ${Array.from(
