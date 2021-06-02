@@ -2,34 +2,20 @@ import { Component } from '../component';
 
 export namespace Property {
     export const KEY = 'property';
+    export const REQUIRES = ['description'];
 
     export interface Data {
         /**
-         * Names of args that a property requires. For example, Range requires `normal` and `max` args.
-         * Args are replaced in `description` and `display` wherever `<arg>` appears.
-         * For example, Range.display is "Range(<normal>/<max>)"
+         * Determine what type of equipment this property is meant to be included on.
          */
-        args: string[];
-
-        /**
-         * Describes the property. This is different from the root description because args are replaced in it.
-         */
-        description: string;
-
-        /**
-         * Optional display string.
-         * If it is undefined, it defaults to the root name. This is useful for unchanging properties like "Heavy".
-         * If it is defined, args are replaced in it before being displayed.
-         */
-        display?: string;
+        type: 'weapon' | 'armor' | 'any';
     }
 
     export function process(data: Data, ctx: Component.Context) {
-        const name = ctx.id.split('.')[1];
         var entities = [];
 
         function hasProp(prop: Properties.Data) {
-            return prop.ref === name;
+            return prop.ref === ctx.id;
         }
 
         for (const [k, v] of Object.entries(ctx.entities)) {
@@ -38,13 +24,13 @@ export namespace Property {
             }
         }
 
+        let alltext = ctx.parent.name + ctx.parent.description.raw;
+        let matches = alltext.matchAll(/{(\w+)}/g);
+        let args = [...new Set([...matches].map((m) => m[1]))];
+
         return {
-            args: data.args,
-            description: {
-                raw: data.description,
-                rendered: ctx.markdown.makeHtml(data.description),
-            },
-            display: data.display,
+            type: data.type,
+            args,
             entities,
         };
     }
@@ -64,6 +50,7 @@ declare module '.' {
 export namespace Properties {
     export const KEY = 'properties';
     export const REQUIRES = ['item'];
+    export const WAIT_FOR = ['property'];
 
     export interface Data {
         /**
@@ -88,42 +75,36 @@ export namespace Properties {
 
     export function process(data: Data[], ctx: Component.Context) {
         return data.map((d) => {
+            if (!ctx.passed['property'].includes(d.ref))
+                throw `${d.ref} does not refer to a valid property!`;
+
             // expand ref into full id and get the property entity.
-            const ref = `property.${d.ref}`;
-            const entity = ctx.entities[ref];
-
-            if (entity === undefined)
-                throw `${ctx.id} contains an undefined reference: "${ref}"!`;
-
-            const property = entity.property;
-
-            if (property === undefined)
-                throw `${ctx.id} references ${entity.id} as a property, but ${entity.id} lacks the property component!`;
+            const entity = ctx.manifest[d.ref];
 
             // process display and description with arg values. replace <argname> with the arg values.
-            var description = property.description;
-            var display = property.display || entity.name;
-            var argmap: { [key: string]: any } = {};
-            for (const arg of property.args) {
+            var description = entity.description.raw;
+            var name = entity.name;
+            var args: { [key: string]: any } = {};
+
+            for (const arg of entity.property.args) {
                 // get arg value if it exists. throw error if it doesn't exist
                 var val = d[arg];
                 if (val === undefined)
-                    throw `property ${entity.name} of ${ctx.id} is missing arg "${arg}"!`;
+                    throw `property ${entity.name} is missing arg "${arg}"!`;
 
-                description = description.replace(`<${arg}>`, val);
-                display = display.replace(`<${arg}>`, val);
-                argmap[arg] = val;
+                description = description.replace(`{${arg}}`, val);
+                name = name.replace(`{${arg}}`, val);
+                args[arg] = val;
             }
 
             return {
-                name: entity.name,
+                name,
                 id: entity.id,
                 description: {
                     raw: description,
                     rendered: ctx.markdown.makeHtml(description),
                 },
-                display: display,
-                args: argmap,
+                args,
             };
         });
     }

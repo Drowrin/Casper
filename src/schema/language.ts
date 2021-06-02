@@ -23,6 +23,23 @@ export namespace Language {
          */
         exotic: boolean;
     }
+
+    export function process(data: Data, ctx: Component.Context) {
+        if (data.script && ctx.entities[data.script]?.language === undefined)
+            throw `${data.script} is not a valid language!`;
+
+        let script = data.script && ctx.manifest[data.script];
+
+        return {
+            speakers: data.speakers,
+            exotic: data.exotic,
+            script: script && {
+                name: script.name,
+                id: script.id,
+                description: script.description,
+            },
+        };
+    }
 }
 Component.register(Language);
 

@@ -16,10 +16,19 @@ export namespace Trait {
         requirements?: string;
     }
 
-    export function process(data: Data | string) {
+    export function process(data: Data | string, ctx: Component.Context) {
         if (typeof data === 'string') return { type: data };
 
-        return data;
+        let requirements = data.requirements && ctx.manifest[data.requirements];
+
+        return {
+            type: data.type,
+            requirements: requirements && {
+                name: requirements.name,
+                id: requirements.id,
+                description: requirements.description,
+            },
+        };
     }
 }
 Component.register(Trait);
@@ -134,6 +143,7 @@ export namespace Lineage {
             name: trait.name,
             id: trait.id,
             description: trait.description,
+            type: trait.trait.type,
         };
     }
 
@@ -143,6 +153,8 @@ export namespace Lineage {
         checkTraits(ctx, traits);
         checkLanguages(ctx, languages);
 
+        let traitData = traits.map((t) => procTrait(ctx, t));
+
         return {
             ...core,
 
@@ -150,7 +162,9 @@ export namespace Lineage {
 
             languages: languages.map((l) => procLang(ctx, l)),
 
-            traits: traits.map((t) => procTrait(ctx, t)),
+            minorTraits: traitData.filter((t) => t.type === 'minor'),
+            majorTraits: traitData.filter((t) => t.type === 'major'),
+            heritageTraits: traitData.filter((t) => t.type === 'heritage'),
 
             subs: [],
         };
@@ -182,6 +196,8 @@ export namespace SubLineage {
         Lineage.checkLanguages(ctx, languages);
         Lineage.checkTraits(ctx, traits);
 
+        let traitData = traits && traits.map((t) => Lineage.procTrait(ctx, t));
+
         let res = {
             ...core,
 
@@ -190,7 +206,9 @@ export namespace SubLineage {
             languages:
                 languages && languages.map((l) => Lineage.procLang(ctx, l)),
 
-            traits: traits && traits.map((t) => Lineage.procTrait(ctx, t)),
+            minorTraits: traitData?.filter((t) => t.type === 'minor'),
+            majorTraits: traitData?.filter((t) => t.type === 'major'),
+            heritageTraits: traitData?.filter((t) => t.type === 'heritage'),
         };
 
         base.lineage.subs.push({

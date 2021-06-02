@@ -4,13 +4,20 @@ export namespace Article {
     export const KEY = 'article';
     export const REQUIRES = ['description'];
 
-    export type Data = string;
+    export type Data = { [key: string]: string };
 
     export function process(data: Data, { markdown }: Component.Context) {
-        return {
-            raw: data,
-            rendered: markdown.makeHtml(data),
-        };
+        return Object.fromEntries(
+            Object.entries(data).map(([n, d]) => {
+                return [
+                    n,
+                    {
+                        raw: d,
+                        rendered: markdown.makeHtml(d),
+                    },
+                ];
+            })
+        );
     }
 }
 Component.register(Article);

@@ -10,7 +10,7 @@ export namespace Proficiency {
          * Lowercase ability name.
          * Used to look up ability by id.
          */
-        ability?: string;
+        ability: string;
 
         /**
          * Some profiencies can be used together.
@@ -28,6 +28,39 @@ export namespace Proficiency {
              */
             effect: string;
         }>;
+    }
+
+    export function process(data: Data, ctx: Component.Context) {
+        if (!ctx.passed['description'].includes(data.ability))
+            throw `${data.ability} does not refer to a valid ability!`;
+
+        let combos = data.combos?.map((c) => {
+            let combo = ctx.manifest[c.skill];
+
+            if (combo === undefined)
+                throw `${c.skill} does not refer to a valid entity!`;
+
+            return {
+                name: combo.name,
+                id: combo.id,
+                description: {
+                    raw: c.effect,
+                    rendered: c.effect,
+                },
+            };
+        });
+
+        let ability = ctx.manifest[data.ability];
+
+        return {
+            combos,
+
+            ability: {
+                name: ability.name,
+                id: ability.id,
+                description: ability.description,
+            },
+        };
     }
 }
 Component.register(Proficiency);

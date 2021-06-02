@@ -19,7 +19,7 @@ const defaultFuseKeys = [
 ];
 
 const defaultFuseOptions: Fuse.IFuseOptions<Entity> = {
-    threshold: 0.55,
+    threshold: 0.3,
     includeMatches: true,
     includeScore: true,
     useExtendedSearch: true,
