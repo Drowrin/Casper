@@ -1,10 +1,25 @@
 import express = require('express');
 import cors = require('cors');
 import fs = require('fs');
+import WebSocket = require('ws');
 import { CasperOptions, Casper } from './casper';
 import { Config } from './config';
 import { Parser } from './parser';
 import { Type } from './schema/type';
+
+// TODO: heartbeat system to test connection occasionally.
+const wss = new WebSocket.Server({ port: Config.wsport });
+let sockets: Array<WebSocket> = [];
+
+wss.on('connection', function connection(ws) {
+    sockets.push(ws);
+    console.log('Registered new websocket client!');
+
+    ws.on('close', function () {
+        console.log('Closing a websocket client!');
+        sockets.splice(sockets.indexOf(ws), 1);
+    });
+});
 
 const casperOptions: CasperOptions = { index: true };
 
@@ -27,11 +42,16 @@ function updateCasper() {
     );
 
     console.log(`All known types: ${Array.from(Type.TYPES).join(', ')}`);
-    console.log(
-        `All known entity keys: ${Array.from(
-            new Set(casper.rawManifest.flatMap((e) => Object.keys(e)))
-        ).join(', ')}`
-    );
+
+    sockets.forEach((ws) => ws.send(JSON.stringify({ hash: casper.hash })));
+    if (sockets.length)
+        console.log(`Notified ${sockets.length} clients of updates`);
+
+    // console.log(
+    //     `All known entity keys: ${Array.from(
+    //         new Set(casper.rawManifest.flatMap((e) => Object.keys(e)))
+    //     ).join(', ')}`
+    // );
 }
 
 parser.dirs.forEach((d) => {
@@ -80,4 +100,3 @@ app.get('/search/:term', (req, res) => {
 
 // Start the app and wait for requests.
 app.listen(Config.port);
-console.log('Express started on port 3001');

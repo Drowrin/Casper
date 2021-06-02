@@ -10,6 +10,13 @@ export interface Config {
     port: number;
 
     /**
+     * The port the websocket server will run at.
+     *
+     * Default: 3002
+     */
+    wsport: number;
+
+    /**
      * The data directories that will be searched for data.
      *
      * Default: [`./data`]
@@ -30,6 +37,7 @@ export interface Config {
 
 export const DefaultConfig: Config = {
     port: 3001,
+    wsport: 3002,
     dataDirs: ['./data'],
     errorLogs: 'stderr',
 };
