@@ -18,7 +18,6 @@ wss.on('connection', function connection(ws: HBWebSocket) {
 
     ws.isAlive = true;
     ws.on('pong', function heartbeat() {
-        console.log('pong');
         (<HBWebSocket>this).isAlive = true;
     });
 
