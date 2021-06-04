@@ -49,7 +49,14 @@ let casper: Casper;
 let lastChange: number = 0;
 let changeThreshold = 500;
 
-function updateCasper() {
+function updateCasper(filename?: string) {
+    if (Date.now() - lastChange < changeThreshold) {
+        return; // filter out rapid file changes
+    }
+
+    if (filename)
+        console.log(`\nChange detected in ${filename}, reloading casper.`);
+
     lastChange = Date.now();
     parser.findFiles();
     casper = parser.makeCasper(casperOptions);
@@ -69,22 +76,15 @@ function updateCasper() {
         );
         console.log(`Notified ${wss.clients.size} clients of updates`);
     }
-
-    // console.log(
-    //     `All known entity keys: ${Array.from(
-    //         new Set(casper.rawManifest.flatMap((e) => Object.keys(e)))
-    //     ).join(', ')}`
-    // );
 }
 
 parser.dirs.forEach((d) => {
     fs.watch(d, (_, filename) => {
-        if (!(filename.endsWith('.yml') || filename.endsWith('.yaml'))) return; // only reload if YAML files change
+        if (!(filename.endsWith('.yml') || filename.endsWith('.yaml'))) {
+            return; // only reload if YAML files change
+        }
 
-        if (Date.now() - lastChange < changeThreshold) return; // filter out rapid file changes
-
-        console.log(`\nChange detected in ${filename}, reloading casper.`);
-        updateCasper();
+        setTimeout(() => updateCasper(filename));
     });
 });
 
