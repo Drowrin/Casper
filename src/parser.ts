@@ -90,7 +90,10 @@ export class Parser {
     getFileEntities(file: string) {
         let buffer: Buffer = fs.readFileSync(file);
 
-        if (buffer.length == 0) return;
+        if (buffer.length == 0) {
+            console.warn(`${file} is empty`);
+            return;
+        }
 
         let entities;
         try {
