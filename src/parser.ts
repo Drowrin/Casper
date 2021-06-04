@@ -110,7 +110,8 @@ export class Parser {
     }
 
     findFilesInner(p: string): void {
-        // read various stats about the file. Used here to determine if a path points to a directory or a file.
+        // read various stats about the file.
+        // Used here to determine if a path points to a directory or a file.
         var stats = fs.lstatSync(p);
 
         if (stats.isFile() && p.endsWith('.yml')) {
