@@ -1,8 +1,7 @@
-node_modules
 data
-build
-package-lock.json
+node_modules
 config.yaml
+package-lock.json
 
 .git
 .gitignore

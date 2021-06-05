@@ -1,12 +1,11 @@
 FROM node:16
 
-COPY . /casper/
-
-VOLUME [ "/casper" ]
+VOLUME [ "/casper/data" ]
 WORKDIR /casper
 
-RUN npm install
+COPY ./build/ build/
+COPY ./package.json package.json
 
-RUN npm run build
+RUN npm install
 
 CMD npm run start
