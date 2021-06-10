@@ -4,8 +4,6 @@ export namespace Type {
     export const KEY = 'type';
     export const SINK = true;
 
-    export let TYPES: Set<string> = new Set();
-
     export function trigger(_: Component.Context) {
         return true; // trigger on every entity
     }
@@ -44,7 +42,6 @@ export namespace Type {
     }
 
     export function transform(processed: any, ctx: Component.Context) {
-        TYPES.add(processed);
         ctx.parent[KEY] = processed;
     }
 }

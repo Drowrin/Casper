@@ -14,8 +14,6 @@ interface HBWebSocket extends WebSocket {
 const wss = new WebSocket.Server({ port: Config.wsport });
 
 wss.on('connection', function connection(ws: HBWebSocket) {
-    console.log('Registered websocket client');
-
     ws.isAlive = true;
     ws.on('pong', function heartbeat() {
         (<HBWebSocket>this).isAlive = true;
@@ -36,7 +34,6 @@ wss.on('connection', function connection(ws: HBWebSocket) {
     }, 30000);
 
     ws.on('close', function () {
-        console.log('Closing a websocket client');
         clearInterval(interval);
     });
 });
@@ -67,8 +64,6 @@ function updateCasper(filename?: string) {
     console.log(
         `Loaded ${files} files containing ${entities} valid entities in ${taken}ms`
     );
-
-    console.log(`All known types: ${Array.from(Type.TYPES).join(', ')}`);
 
     if (wss.clients.size) {
         wss.clients.forEach((ws) =>
