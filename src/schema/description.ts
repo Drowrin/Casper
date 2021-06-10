@@ -5,13 +5,6 @@ export namespace Description {
     export const SUPPRESS_TYPE = true;
 
     export type Data = string;
-
-    export function process(data: Data, { markdown }: Component.Context) {
-        return {
-            raw: data,
-            rendered: markdown.makeHtml(data),
-        };
-    }
 }
 Component.register(Description);
 

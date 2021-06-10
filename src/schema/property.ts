@@ -82,7 +82,7 @@ export namespace Properties {
             const entity = ctx.manifest[d.ref];
 
             // process display and description with arg values. replace <argname> with the arg values.
-            var description = entity.description.raw;
+            var description = entity.description;
             var name = entity.name;
             var args: { [key: string]: any } = {};
 
@@ -100,10 +100,7 @@ export namespace Properties {
             return {
                 name,
                 id: entity.id,
-                description: {
-                    raw: description,
-                    rendered: ctx.markdown.makeHtml(description),
-                },
+                description,
                 args,
             };
         });

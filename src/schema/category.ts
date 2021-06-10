@@ -7,7 +7,7 @@ export namespace Category {
     export interface Data {
         name: string;
         id: string;
-        description: { raw: string; rendered: string };
+        description: string;
     }
 
     export type Map = { [key: string]: Data };

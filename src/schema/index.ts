@@ -1,5 +1,4 @@
 import fs = require('fs');
-import { Converter } from 'showdown';
 import yaml from 'js-yaml';
 
 import './activity';
@@ -23,7 +22,6 @@ import './vehicle';
 import './weapon';
 
 import { Component } from '../component';
-import { casperMarkdown } from '../markdown';
 import { Config } from '../config';
 
 export interface EntityData {}
@@ -101,23 +99,6 @@ export function resolveEntities(ent: EntityData[]): Manifest {
         }
     }
 
-    let converter = new Converter({
-        extensions: [casperMarkdown(d)],
-
-        ghCompatibleHeaderId: true,
-        simplifiedAutoLink: true,
-        excludeTrailingPunctuationFromURLs: true,
-        literalMidWordUnderscores: true,
-        strikethrough: true,
-        tables: true,
-        tablesHeaderId: true,
-        tasklists: true,
-        disableForced4SpacesIndentedSublists: true,
-        headerLevelStart: 3,
-    });
-
-    // const cats = getAllCategories(d, converter);
-
     // the initial state of the output manifest before entities are resolved
     var out: Manifest = {};
     for (var key in d) {
@@ -139,13 +120,12 @@ export function resolveEntities(ent: EntityData[]): Manifest {
                 passed,
                 parent: v,
                 data: d[k],
-                markdown: converter,
                 components,
             };
 
             try {
                 Component.resolve(comp, ctx);
-            } catch (err) {
+            } catch (err: any) {
                 error(ctx.id, err.toString());
 
                 delete out[ctx.id];

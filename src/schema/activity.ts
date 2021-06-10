@@ -49,10 +49,7 @@ export namespace Activities {
             return {
                 name: entity.name,
                 id: entity.id,
-                description: {
-                    raw: entity.description,
-                    rendered: ctx.markdown.makeHtml(<string>entity.description),
-                },
+                description: entity.description,
                 time: activity.time,
             };
         });

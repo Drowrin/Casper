@@ -43,10 +43,7 @@ export namespace Proficiency {
             return {
                 name: combo.name,
                 id: combo.id,
-                description: {
-                    raw: c.effect,
-                    rendered: c.effect,
-                },
+                description: c.effect,
             };
         });
 

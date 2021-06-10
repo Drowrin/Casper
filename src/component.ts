@@ -1,4 +1,3 @@
-import { Converter } from 'showdown';
 import { Entity, EntityData, EntityMap, Manifest } from './schema';
 
 export namespace Component {
@@ -38,12 +37,6 @@ export namespace Component {
          * The entity data parsed from the source without any processing.
          */
         data: EntityData;
-
-        /**
-         * A pre-confiugured markdown converter from Showdownjs.
-         * Most common usage would be `markdown.makeHtml(string)`.
-         */
-        markdown: Converter;
 
         /**
          * A list of all components, in order of when they are processed.
