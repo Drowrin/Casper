@@ -75,4 +75,3 @@ Multiple args are joined together to form an entity id, which is looked up in th
 -   [object-hash](https://www.npmjs.com/package/object-hash)
 -   [Ajv](https://ajv.js.org/)
 -   [typescript-json-schema](https://github.com/YousefED/typescript-json-schema)
--   [Showdown](https://github.com/showdownjs/showdown)
