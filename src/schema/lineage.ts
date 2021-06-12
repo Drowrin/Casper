@@ -104,43 +104,24 @@ export namespace Lineage {
         };
     }
 
-    export function procLang(ctx: Component.Context, l: string) {
-        let lang = ctx.manifest[l];
-        return {
-            name: lang.name,
-            id: lang.id,
-            description: lang.description,
-        };
-    }
-
-    export function procTrait(ctx: Component.Context, t: string) {
-        let trait = ctx.manifest[t];
-        return {
-            name: trait.name,
-            id: trait.id,
-            description: trait.description,
-            type: trait.trait.type,
-        };
-    }
-
     export function process(data: Data, ctx: Component.Context) {
         let { stature, languages, traits, ...core } = { ...data };
 
         checkTraits(ctx, traits);
         checkLanguages(ctx, languages);
 
-        let traitData = traits.map((t) => procTrait(ctx, t));
+        let traitData = traits.map((t) => ctx.manifest[t]);
 
         return {
             ...core,
 
             stature: procStature(stature),
 
-            languages: languages.map((l) => procLang(ctx, l)),
+            languages: languages.map((l) => ctx.manifest[l]),
 
-            minorTraits: traitData.filter((t) => t.type === 'minor'),
-            majorTraits: traitData.filter((t) => t.type === 'major'),
-            heritageTraits: traitData.filter((t) => t.type === 'heritage'),
+            minorTraits: traitData.filter((t) => t.trait === 'minor'),
+            majorTraits: traitData.filter((t) => t.trait === 'major'),
+            heritageTraits: traitData.filter((t) => t.trait === 'heritage'),
 
             subs: [],
         };
@@ -172,19 +153,18 @@ export namespace SubLineage {
         Lineage.checkLanguages(ctx, languages);
         Lineage.checkTraits(ctx, traits);
 
-        let traitData = traits && traits.map((t) => Lineage.procTrait(ctx, t));
+        let traitData = traits && traits.map((t) => ctx.manifest[t]);
 
         let res = {
             ...core,
 
             stature: stature && Lineage.procStature(stature),
 
-            languages:
-                languages && languages.map((l) => Lineage.procLang(ctx, l)),
+            languages: languages && languages.map((l) => ctx.manifest[l]),
 
-            minorTraits: traitData?.filter((t) => t.type === 'minor'),
-            majorTraits: traitData?.filter((t) => t.type === 'major'),
-            heritageTraits: traitData?.filter((t) => t.type === 'heritage'),
+            minorTraits: traitData?.filter((t) => t.trait === 'minor'),
+            majorTraits: traitData?.filter((t) => t.trait === 'major'),
+            heritageTraits: traitData?.filter((t) => t.trait === 'heritage'),
         };
 
         base.lineage.subs.push({
