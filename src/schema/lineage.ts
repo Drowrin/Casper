@@ -3,33 +3,9 @@ import { Component } from '../component';
 export namespace Trait {
     export const KEY = 'trait';
     export const REQUIRES = ['description'];
+    export const OPTIONAL = ['req'];
 
-    export interface Data {
-        /**
-         * The type of trait this entity represents.
-         */
-        type: 'minor' | 'major' | 'heritage';
-
-        /**
-         * Some traits have requirements. They should be described here.
-         */
-        requirements?: string;
-    }
-
-    export function process(data: Data | string, ctx: Component.Context) {
-        if (typeof data === 'string') return { type: data };
-
-        let requirements = data.requirements && ctx.manifest[data.requirements];
-
-        return {
-            type: data.type,
-            requirements: requirements && {
-                name: requirements.name,
-                id: requirements.id,
-                description: requirements.description,
-            },
-        };
-    }
+    export type Data = 'minor' | 'major' | 'heritage';
 }
 Component.register(Trait);
 

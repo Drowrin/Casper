@@ -14,6 +14,7 @@ import './lineage';
 import './name';
 import './proficiency';
 import './property';
+import './req';
 import './source';
 import './spell';
 import './tool';
