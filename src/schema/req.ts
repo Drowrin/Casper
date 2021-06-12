@@ -62,16 +62,23 @@ export namespace Req {
             data = [data];
         }
 
-        data.forEach((r) => {
-            if (r.entity && ctx.entities[r.entity] === undefined)
-                throw `${r.entity} does not refer to a valid entity!`;
+        return data.map((d) => {
+            let { entity, ...r } = d;
+
+            let e = entity && ctx.entities[entity];
+
+            if (entity && e === undefined)
+                throw `${entity} does not refer to a valid entity!`;
 
             ['str', 'con', 'dex', 'int', 'wis', 'cha', 'level'].forEach((s) =>
                 checkBounds(r, s)
             );
-        });
 
-        return data;
+            return {
+                ...r,
+                entity: e,
+            };
+        });
     }
 }
 Component.register(Req);
