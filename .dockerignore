@@ -1,7 +1,6 @@
 data
 node_modules
 config.yaml
-package-lock.json
 
 .git
 .gitignore
