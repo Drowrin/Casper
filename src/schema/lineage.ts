@@ -22,8 +22,9 @@ export namespace Lineage {
 
         /**
          * Mechanical size category of the lineage.
+         * This is optional on a limited lineage.
          */
-        size: 'small' | 'medium';
+        size?: 'small' | 'medium';
 
         /**
          * Average height and weight ranges of the lineage.
@@ -32,14 +33,16 @@ export namespace Lineage {
             /**
              * Average height range of the lineage in feet.
              * Should be two numbers separated by a hyphen, for example "4-5".
-             * @pattern ^\d+-\d+$
+             * Alternatively, if the lineage is limited, this can be a multiplier, for example "x2".
+             * @pattern ^(\d+-\d+)|(x\d+)$
              */
             height: string;
 
             /**
              * Average weight range of the lineage in feet.
              * Should be two numbers separated by a hyphen, for example "200-300".
-             * @pattern ^\d+-\d+$
+             * Alternatively, if the lineage is limited, this can be a multiplier, for example "x2".
+             * @pattern ^(\d+-\d+)|(x\d+)$
              */
             weight: string;
         };
@@ -50,24 +53,33 @@ export namespace Lineage {
         age: {
             /**
              * The average lifespan of the lineage in years.
+             * Should be an integer indicating the number of years.
+             * Alternatively, if the lineage is limited, this can be a multiplier, for example "x2".
+             * @pattern ^(\d+)|(x\d+)$
              */
-            lifespan: number;
+            lifespan: number | string;
 
             /**
              * The age at which a lineage is culturally considered an adult.
+             * Should be an integer indicating the number of years.
+             * Alternatively, if the lineage is limited, this can be a multiplier, for example "x2".
+             * @pattern ^(\d+)|(x\d+)$
              */
-            adulthood: number;
+            adulthood: number | string;
 
             /**
              * The age at which a lineage is physically an adult.
+             * Should be an integer indicating the number of years.
+             * Alternatively, if the lineage is limited, this can be a multiplier, for example "x2".
+             * @pattern ^(\d+)|(x\d+)$
              */
-            maturity: number;
+            maturity: number | string;
         };
 
         /**
          * An array of id references pointing to languages this lineage typically speaks.
          */
-        languages: string[];
+        languages?: string[];
     }
 
     export interface Data extends CoreTraits {
@@ -97,10 +109,24 @@ export namespace Lineage {
         });
     }
 
+    export function parseStature(s: string) {
+        if (s.startsWith('x')) {
+            return {
+                mult: parseInt(s.substr(1)),
+            };
+        }
+
+        let range = s.split('-').map((i) => parseInt(i));
+        return {
+            low: range[0],
+            high: range[1],
+        };
+    }
+
     export function procStature(stature: { height: string; weight: string }) {
         return {
-            height: stature.height.split('-').map((i) => parseInt(i)),
-            weight: stature.weight.split('-').map((i) => parseInt(i)),
+            height: parseStature(stature.height),
+            weight: parseStature(stature.weight),
         };
     }
 
@@ -110,6 +136,30 @@ export namespace Lineage {
         checkTraits(ctx, traits);
         checkLanguages(ctx, languages);
 
+        if (!core.limited && !languages?.length) {
+            throw `Language list can't be empty on a non-limited lineage!`;
+        }
+
+        if (!core.limited && stature.height.startsWith('x')) {
+            throw `Height can't be a multiplier on a non-limited lineage!`;
+        }
+        if (!core.limited && stature.weight.startsWith('x')) {
+            throw `Weight can't be a multiplier on a non-limited lineage!`;
+        }
+        if (!core.limited && typeof core.age.lifespan === 'string') {
+            throw `Lifespan can't be a multiplier on a non-limited lineage!`;
+        }
+        if (!core.limited && typeof core.age.adulthood === 'string') {
+            throw `Adulthood can't be a multiplier on a non-limited lineage!`;
+        }
+        if (!core.limited && typeof core.age.maturity === 'string') {
+            throw `Maturity can't be a multiplier on a non-limited lineage!`;
+        }
+
+        if (!core.limited && core.size === undefined) {
+            throw `Size must be entered for a non-limited lineage!`;
+        }
+
         let traitData = traits.map((t) => ctx.manifest[t]);
 
         return {
@@ -117,7 +167,7 @@ export namespace Lineage {
 
             stature: procStature(stature),
 
-            languages: languages.map((l) => ctx.manifest[l]),
+            languages: languages?.map((l) => ctx.manifest[l]),
 
             minorTraits: traitData.filter((t) => t.trait === 'minor'),
             majorTraits: traitData.filter((t) => t.trait === 'major'),
