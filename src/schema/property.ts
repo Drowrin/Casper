@@ -24,7 +24,7 @@ export namespace Property {
             }
         }
 
-        let alltext = ctx.parent.name + ctx.parent.description.raw;
+        let alltext = ctx.parent.name + ctx.parent.description;
         let matches = alltext.matchAll(/{(\w+)}/g);
         let args = [...new Set([...matches].map((m) => m[1]))];
 
