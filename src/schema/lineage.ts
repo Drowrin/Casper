@@ -29,7 +29,7 @@ export namespace Lineage {
         /**
          * Average height and weight ranges of the lineage.
          */
-        stature: {
+        stature?: {
             /**
              * Average height range of the lineage in feet.
              * Should be two numbers separated by a hyphen, for example "4-5".
@@ -50,7 +50,7 @@ export namespace Lineage {
         /**
          * Information on how this lineage ages, including lifespan and age of maturity.
          */
-        age: {
+        age?: {
             /**
              * The average lifespan of the lineage in years.
              * Should be an integer indicating the number of years.
@@ -112,7 +112,7 @@ export namespace Lineage {
     export function parseStature(s: string) {
         if (s.startsWith('x')) {
             return {
-                mult: parseInt(s.substr(1)),
+                mult: s,
             };
         }
 
@@ -123,11 +123,13 @@ export namespace Lineage {
         };
     }
 
-    export function procStature(stature: { height: string; weight: string }) {
-        return {
-            height: parseStature(stature.height),
-            weight: parseStature(stature.weight),
-        };
+    export function procStature(stature?: { height: string; weight: string }) {
+        return (
+            stature && {
+                height: parseStature(stature.height),
+                weight: parseStature(stature.weight),
+            }
+        );
     }
 
     export function process(data: Data, ctx: Component.Context) {
@@ -136,28 +138,71 @@ export namespace Lineage {
         checkTraits(ctx, traits);
         checkLanguages(ctx, languages);
 
-        if (!core.limited && !languages?.length) {
-            throw `Language list can't be empty on a non-limited lineage!`;
-        }
+        if (core.limited) {
+            core.age = core.age || {
+                adulthood: 'x1',
+                maturity: 'x1',
+                lifespan: 'x1',
+            };
 
-        if (!core.limited && stature.height.startsWith('x')) {
-            throw `Height can't be a multiplier on a non-limited lineage!`;
-        }
-        if (!core.limited && stature.weight.startsWith('x')) {
-            throw `Weight can't be a multiplier on a non-limited lineage!`;
-        }
-        if (!core.limited && typeof core.age.lifespan === 'string') {
-            throw `Lifespan can't be a multiplier on a non-limited lineage!`;
-        }
-        if (!core.limited && typeof core.age.adulthood === 'string') {
-            throw `Adulthood can't be a multiplier on a non-limited lineage!`;
-        }
-        if (!core.limited && typeof core.age.maturity === 'string') {
-            throw `Maturity can't be a multiplier on a non-limited lineage!`;
-        }
+            core.age.adulthood = core.age?.adulthood || 'x1';
+            core.age.maturity = core.age?.maturity || 'x1';
+            core.age.lifespan = core.age?.lifespan || 'x1';
 
-        if (!core.limited && core.size === undefined) {
-            throw `Size must be entered for a non-limited lineage!`;
+            stature = stature || {
+                height: 'x1',
+                weight: 'x1',
+            };
+            stature.height = stature.height || 'x1';
+            stature.weight = stature.weight || 'x1';
+        } else {
+            if (!languages?.length) {
+                throw `Language list can't be empty on a non-limited lineage!`;
+            }
+
+            if (!stature) {
+                throw `Stature isn't optional on a non-limited lineage!`;
+            }
+            if (!stature?.height) {
+                throw `Height isn't optional on a non-limited lineage!`;
+            }
+            if (!stature?.weight) {
+                throw `Weight isn't optional on a non-limited lineage!`;
+            }
+
+            if (stature?.height.startsWith('x')) {
+                throw `Height can't be a multiplier on a non-limited lineage!`;
+            }
+            if (stature?.weight.startsWith('x')) {
+                throw `Weight can't be a multiplier on a non-limited lineage!`;
+            }
+
+            if (!core.age) {
+                throw `Age isn't optional on a non-limited lineage!`;
+            }
+            if (!core.age?.adulthood) {
+                throw `Adulthood isn't optional on a non-limited lineage!`;
+            }
+            if (!core.age?.maturity) {
+                throw `Maturity isn't optional on a non-limited lineage!`;
+            }
+            if (!core.age?.lifespan) {
+                throw `Lifespan isn't optional on a non-limited lineage!`;
+            }
+
+            if (typeof core.age?.lifespan === 'string') {
+                throw `Lifespan can't be a multiplier on a non-limited lineage!`;
+            }
+            if (typeof core.age?.adulthood === 'string') {
+                throw `Adulthood can't be a multiplier on a non-limited lineage!`;
+            }
+            if (typeof core.age?.maturity === 'string') {
+                throw `Maturity can't be a multiplier on a non-limited lineage!`;
+            }
+
+            if (core.size === undefined) {
+                throw `Size must be entered for a non-limited lineage!`;
+            }
         }
 
         let traitData = traits.map((t) => ctx.manifest[t]);
@@ -200,6 +245,25 @@ export namespace SubLineage {
 
         let base = ctx.manifest[of];
 
+        if (!core.limited) {
+            if (stature?.height.startsWith('x')) {
+                throw `Height can't be a multiplier on a non-limited lineage!`;
+            }
+            if (stature?.weight.startsWith('x')) {
+                throw `Weight can't be a multiplier on a non-limited lineage!`;
+            }
+
+            if (typeof core.age?.lifespan === 'string') {
+                throw `Lifespan can't be a multiplier on a non-limited lineage!`;
+            }
+            if (typeof core.age?.adulthood === 'string') {
+                throw `Adulthood can't be a multiplier on a non-limited lineage!`;
+            }
+            if (typeof core.age?.maturity === 'string') {
+                throw `Maturity can't be a multiplier on a non-limited lineage!`;
+            }
+        }
+
         Lineage.checkLanguages(ctx, languages);
         Lineage.checkTraits(ctx, traits);
 
@@ -208,7 +272,7 @@ export namespace SubLineage {
         let res = {
             ...core,
 
-            stature: stature && Lineage.procStature(stature),
+            stature: Lineage.procStature(stature),
 
             languages: languages && languages.map((l) => ctx.manifest[l]),
 
