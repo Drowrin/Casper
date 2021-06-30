@@ -227,7 +227,7 @@ Component.register(Lineage);
 export namespace SubLineage {
     export const KEY = 'sublineage';
     export const REQUIRES = ['description'];
-    export const WAIT_FOR = ['language', 'trait', 'lineage'];
+    export const WAIT_FOR = ['language', 'trait', 'lineage', 'brief'];
 
     export interface Data extends Partial<Lineage.Data> {
         /**
@@ -285,6 +285,7 @@ export namespace SubLineage {
             name: ctx.parent.name,
             id: ctx.parent.id,
             description: ctx.parent.description,
+            brief: ctx.parent.brief,
         });
 
         let { subs, ...lineage } = base.lineage;
@@ -312,6 +313,7 @@ export namespace SubLineage {
                 name: base.name,
                 id: base.id,
                 description: base.description,
+                brief: base.brief,
             },
         };
     }

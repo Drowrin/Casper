@@ -25,6 +25,7 @@ declare module '.' {
 
 export namespace Activities {
     export const KEY = 'activities';
+    export const WAIT_FOR = ['brief'];
 
     export interface Data {
         /**
@@ -36,7 +37,7 @@ export namespace Activities {
     export function process(data: Data[], ctx: Component.Context) {
         return data.map((d) => {
             const ref = `activity.${d.ref}`;
-            const entity = ctx.entities[ref];
+            const entity = ctx.manifest[ref];
 
             if (entity === undefined)
                 throw `${ctx.id} contains an undefined reference: "${ref}!`;
@@ -50,6 +51,7 @@ export namespace Activities {
                 name: entity.name,
                 id: entity.id,
                 description: entity.description,
+                brief: entity.brief,
                 time: activity.time,
             };
         });

@@ -4,6 +4,7 @@ import yaml from 'js-yaml';
 import './activity';
 import './armor';
 import './article';
+import './brief';
 import './category';
 import './description';
 import './id';

@@ -33,6 +33,11 @@ export interface Config {
      * Default: `stderr`
      */
     errorLogs: string;
+
+    /**
+     * Number of characters allowed in the brief component.
+     */
+    brief: number;
 }
 
 export const DefaultConfig: Config = {
@@ -40,6 +45,7 @@ export const DefaultConfig: Config = {
     wsport: 3002,
     dataDirs: ['./data'],
     errorLogs: 'stderr',
+    brief: 250,
 };
 
 if (!fs.existsSync('./config.yaml')) {

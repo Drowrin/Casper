@@ -3,6 +3,7 @@ import { Component } from '../component';
 export namespace Language {
     export const KEY = 'language';
     export const REQUIRES = ['description'];
+    export const WAIT_FOR = ['brief'];
 
     export interface Data {
         /**
@@ -37,6 +38,7 @@ export namespace Language {
                 name: script.name,
                 id: script.id,
                 description: script.description,
+                brief: script.brief,
             },
         };
     }

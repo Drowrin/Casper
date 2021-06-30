@@ -3,6 +3,7 @@ import { Component } from '../component';
 export namespace Proficiency {
     export const KEY = 'proficiency';
     export const REQUIRES = ['description'];
+    export const WAIT_FOR = ['brief'];
 
     export interface Data {
         /**
@@ -44,6 +45,7 @@ export namespace Proficiency {
                 name: combo.name,
                 id: combo.id,
                 description: c.effect,
+                brief: c.effect,
             };
         });
 
@@ -56,6 +58,7 @@ export namespace Proficiency {
                 name: ability.name,
                 id: ability.id,
                 description: ability.description,
+                brief: ability.brief,
             },
         };
     }

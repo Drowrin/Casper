@@ -8,6 +8,7 @@ export namespace Category {
         name: string;
         id: string;
         description: string;
+        brief: string;
     }
 
     export type Map = { [key: string]: Data };
@@ -35,7 +36,7 @@ Component.register(Category);
 
 export namespace Categories {
     export const KEY = 'categories';
-    export const WAIT_FOR = [Category.KEY]; // wait for Categories to be processed
+    export const WAIT_FOR = [Category.KEY, 'brief']; // wait for Categories to be processed
     export const SUPPRESS_TYPE = true;
 
     export function trigger(_: Component.Context) {
@@ -80,6 +81,7 @@ export namespace Categories {
                 id,
                 name: category.name,
                 description: category.description,
+                brief: category.brief,
             };
         });
     }
