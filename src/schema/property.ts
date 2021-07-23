@@ -50,7 +50,7 @@ declare module '.' {
 export namespace Properties {
     export const KEY = 'properties';
     export const REQUIRES = ['item'];
-    export const WAIT_FOR = ['property'];
+    export const WAIT_FOR = ['property', 'brief'];
 
     export interface Data {
         /**
@@ -83,6 +83,7 @@ export namespace Properties {
 
             // process display and description with arg values. replace <argname> with the arg values.
             var description = entity.description;
+            var brief = entity.brief;
             var name = entity.name;
             var args: { [key: string]: any } = {};
 
@@ -93,6 +94,7 @@ export namespace Properties {
                     throw `property ${entity.name} is missing arg "${arg}"!`;
 
                 description = description.replace(`{${arg}}`, val);
+                brief = brief.replace(`{${arg}}`, val);
                 name = name.replace(`{${arg}}`, val);
                 args[arg] = val;
             }
@@ -101,6 +103,7 @@ export namespace Properties {
                 name,
                 id: entity.id,
                 description,
+                brief,
                 args,
             };
         });
